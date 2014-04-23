@@ -1,0 +1,40 @@
+0 * * * * php /var/www/bh/update_files/checkSeries.php
+
+0 0 * * * /bin/sh /var/www/bh/update_files/backup.sh > /dev/null 2>&1
+
+*/10 * * * * php /var/www/bh/update_files/update_standings.php
+*/10 * * * * php /var/www/bh/update_files/update_standings_RD.php
+
+*/5 * * * * php /var/www/bh/update_files/australia_al_ppm.php
+*/5 * * * * php /var/www/bh/update_files/poland.php
+*/5 * * * * php /var/www/bh/update_files/spain_pd_ppm_special.php
+*/5 * * * * php /var/www/bh/update_files/denmark.php
+*/5 * * * * php /var/www/bh/update_files/russia.php
+*/5 * * * * php /var/www/bh/update_files/croatia.php
+
+0 * * * * php /var/www/bh/update_files/england_ch.php
+0 * * * * php /var/www/bh/update_files/england_l1.php
+0 * * * * php /var/www/bh/update_files/england_l2.php
+0 * * * * php /var/www/bh/update_files/england_pr.php
+0 * * * * php /var/www/bh/update_files/france_l1.php
+0 * * * * php /var/www/bh/update_files/france_l2.php
+0 * * * * php /var/www/bh/update_files/germany_2bl.php
+0 * * * * php /var/www/bh/update_files/germany_bl.php
+0 * * * * php /var/www/bh/update_files/germany_3l.php
+0 * * * * php /var/www/bh/update_files/italy_a.php
+0 * * * * php /var/www/bh/update_files/italy_b.php
+0 * * * * php /var/www/bh/update_files/scotland_ch.php
+0 * * * * php /var/www/bh/update_files/scotland_pr.php
+0 * * * * php /var/www/bh/update_files/scotland_l1.php
+0 * * * * php /var/www/bh/update_files/scotland_l2.php
+0 * * * * php /var/www/bh/update_files/turkey_sl.php
+0 * * * * php /var/www/bh/update_files/romania.php
+0 * * * * php /var/www/bh/update_files/czech_republic.php
+0 * * * * php /var/www/bh/update_files/cyprus.php
+0 * * * * php /var/www/bh/update_files/slovenia.php
+0 * * * * php /var/www/bh/update_files/slovakia.php
+0 * * * * php /var/www/bh/update_files/austria.php
+0 * * * * php /var/www/bh/update_files/russia.php
+0 * * * * php /var/www/bh/update_files/mexico.php
+0 * * * * php /var/www/bh/update_files/japan.php
+0 * * * * php /var/www/bh/update_files/usa.php

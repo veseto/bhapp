@@ -1,0 +1,10 @@
+.container {
+	width: 1170px !important;
+}
+.mainNav ul {
+	padding: 0px;
+	margin: 0px;
+}
+.mainNav ul li {
+	width: 120px;
+}
