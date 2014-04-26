@@ -2,9 +2,18 @@
 	width: 1170px !important;
 }
 .mainNav ul {
-	padding: 0px;
-	margin: 0px;
+	padding: 3px 0;
 }
 .mainNav ul li {
 	width: 120px;
+}
+.mainNavUl {
+	margin-right: 0px !important;
+}
+ol {
+	margin: 0 !important;
+	padding: 0 !important;	
+}
+.breadcrumb {
+	background-color: #fff !important;
 }

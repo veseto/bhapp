@@ -2,6 +2,6 @@
 
 @section('content')
     @foreach($leagues as $league)
-        <p><a href="/dev/public/{{ $league->country }}/{{ $league->fullName }}">{{ $league->fullName }}</a></p>
-    @endforeach
+    	<a href="{{ URL::route('archive', array('country' => $league->country, 'league' => $league->fullName)) }}"> {{ $league->fullName }} </a><br>
+ 	@endforeach
 @stop

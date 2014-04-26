@@ -40,7 +40,7 @@
         </div>-->
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
+            <li class="active"><a href="#">Matches</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
             <li class="dropdown">
@@ -56,7 +56,7 @@
               </ul>
             </li>
           </ul>
-          <ul class="nav navbar-nav navbar-right">
+          <ul class="nav navbar-nav navbar-right mainNavUl">
             <li><a href="#">Default</a></li>
             <li><a href="#">Static top</a></li>
             <li class="active"><a href="#">Fixed top</a></li>
@@ -69,7 +69,8 @@
 <div class="container">
   <ol class="breadcrumb">
     <li><a href="#">Home</a></li>
-    <li><a href="#">Library</a></li>
-    <li class="active">Data</li>
+    <li><a href="#">Germany</a></li>
+    <li><a href="#">3.Liga</a></li>
+    <li class="active">Fixtures</li>
   </ol>
 </div>

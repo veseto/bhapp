@@ -202,7 +202,8 @@
 
 	//$q = "SELECT * from `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where leagueDetails.leagueId=4";
 	// echo "$q<br>";
-	$q = "SELECT * FROM `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where resultShort='' and leagueDetails.leagueId=11";
+	$start = time();
+	$q = "SELECT * FROM `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where resultShort=''";
 	$res = $mysqli->query($q);
 	echo $mysqli->error;
 	while ($row = $res->fetch_assoc()) {
@@ -222,5 +223,8 @@
 		echo getMatchOdds($row['matchId']);
 		echo parseMatchDetails($url, $row['matchId'], $row['season']);
 	}
+
+	$end = time();
+	echo ($end-$start)." sec for 200 matches";
 
 ?>

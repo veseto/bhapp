@@ -30,7 +30,6 @@ Route::get('{country}', function($country)
     return View::make('leagues')->with('leagues', $leagues);
 });
 
-Route::get('{country}/{league}', function($country, $league)
-{
-    return View::make('seasons')->with('seasons', $leagueId->leagueId);
-});
+Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
+
+Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));

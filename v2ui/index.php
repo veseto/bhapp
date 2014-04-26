@@ -1,9 +1,8 @@
 <?php
   include("includes/header.php");
 ?>
-    <div class="container" style="border: 1px solid">
-
-      <div class="page-header">
+    <div class="container">
+      <div class="page-header" style="margin-top: 0px;">
         <h1>Non-responsive Bootstrap</h1>
         <p class="lead">Disable the responsiveness of Bootstrap by fixing the width of the container and using the first grid system tier.</p>
       </div>
@@ -19,7 +18,13 @@
       <p>There is no way around this as it's default browser behavior. The only solution is a responsive layout or using a non-fixed element.</p>
 
       <h3>Non-responsive grid system</h3>
-      <div class="row">
+      <div class="row" style="margin-left: 0px; margin-right: 0px;">
+        <div class="col-xs-4">One third</div>
+        <div class="col-xs-4">One third</div>
+        <div class="col-xs-4">One third</div>
+      </div>
+
+      <div class="row" style="margin-left: 0px; margin-right: 0px;">
         <div class="col-xs-4">One third</div>
         <div class="col-xs-4">One third</div>
         <div class="col-xs-4">One third</div>
@@ -42,6 +47,10 @@
       <p>There is no way around this as it's default browser behavior. The only solution is a responsive layout or using a non-fixed element.</p>
 
     </div> <!-- /container -->
-<?php
-  include("includes/footer.php");
-?>
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted"> today's matches: <strong><a href="#">43</a></strong><strong> | </strong>BSF for today's matches: <strong>2213€</strong><strong> | </strong>Total BSF: <strong>5346€</strong></p>
+      </div>
+    </div>
+  </body>
+</html>
