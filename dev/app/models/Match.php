@@ -10,7 +10,7 @@ class Match extends Eloquent {
 
     public static function matchesForSeason($leagueId, $season) {
 
-    	return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season);
+    	return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season)->orderBy('matchDate', 'ASC')->orderBy('matchTime', 'ASC');
 
     }
 }

@@ -18,7 +18,9 @@ class MatchController extends BaseController {
 		$drawCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'D')->count();
 		$homeCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'H')->count();
 		$awayCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'A')->count();
-
+		$seq = $this->getSequences($country, $leagueName, $season);
+		$sSeq = Match::matchesForSeason($leagueId, $season)->get(array('resultShort'));
+		
 
 		$array = array('leagueName' => $leagueName, 
 						'country' => $country,
@@ -27,11 +29,49 @@ class MatchController extends BaseController {
 						'draw' => $drawCount, 
 						'home' => $homeCount,
 						'away' => $awayCount,
-						'distResults' => $distResults);
+						'distResults' => $distResults, 
+						'seq' => $seq, 
+						'sSeq' => $sSeq);
 
+		//->nest('seq',  'sequences', array('sequences' => $seq)
 		return View::make('stats')->with('stats', $array);
 	
 	}
+
+	public function getSequences($country, $leagueName, $season) {
+
+		$seq = array();
+		$leagueId = LeagueDetails::getId($country, $leagueName);
+		$teams = Match::matchesForSeason($leagueId, $season)->distinct('home')->get(array('home'));
+		foreach ($teams as $team) {
+			$res = array();
+			// $seq[$team->home] = array();
+			$regexp = $team->home;
+			
+			$matches = Match::matchesForSeason($leagueId, $season)
+            ->where(function($query) use ($regexp)
+            {
+                $query->where('home', '=', $regexp)
+                      ->orWhere('away', '=', $regexp);
+            })
+			->orderBy('matchDate', 'desc')->get();
+			foreach ($matches as $match) {
+				if ($match->resultShort == 'D') {
+					array_push($res, 'D');
+				} else if (($team->home === $match->home and $match->resultShort == 'H') or ($team->home === $match->away and $match->resultShort == 'A')) {
+					array_push($res, 'W');
+				} else {
+					array_push($res, 'L');
+				}
+				// array_push($seq[$team->home], $res);
+			}
+			$seq = array_add($seq, $team->home, $res);
+		}	
+
+		return $seq;
+		// return View::make('sequences')->with('sequences', $seq);
+	}
+
 
 	private function getUniqueResults($matches) {
 

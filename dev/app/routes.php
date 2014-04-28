@@ -33,3 +33,5 @@ Route::get('{country}', function($country)
 Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
 
 Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));
+
+Route::get('{country}/{league}/{season}/sequences', array('as' => 'sequences', 'uses' => "MatchController@getSequences"));
