@@ -12,6 +12,8 @@
         {{ HTML::style('css/bootstrap.min.css') }}
         {{ HTML::style('css/custom.css') }}
         {{ HTML::style('css/datepicker3.css') }}
+        {{ HTML::style('css/datatables.css') }}
+        {{ HTML::style('css/datatables_themeroller.css') }}
 	    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	    <!--[if lt IE 9]>
@@ -22,16 +24,17 @@
 
 
 	<body>  
+	        {{ HTML::script('js/jquery-1.11.0.min.js') }}
+
 	<!-- navbar -->
 	<div class="navbar navbar-inverse navbar-fixed-top mainNav" role="navigation">
 	  <div class="container">
 	    <div class="navbar-collapse collapse">
 	      <ul class="nav navbar-nav">
-	        <li class="active"><a href="#">matches</a></li>
-	        <li><a href="{{ URL::to('countries') }}">countries</a></li>
+	        <li class="{{Request::path() == 'home' ? 'active' : '';}}"><a href="{{ URL::to('home') }}">home</a></li>
+	        <li class="{{Request::path() == 'countries' ? 'active' : '';}}"><a href="{{ URL::to('countries') }}">statistics</a></li>
 	        <li><a href="#">livescore</a></li>
 	        <li><a href="#">streaks</a></li>
-	        <li><a href="#">statistics</a></li>
 	        <li class="dropdown">
 	          <a href="#" class="dropdown-toggle" data-toggle="dropdown">dropdown <b class="caret"></b></a>
 	          <ul class="dropdown-menu">
@@ -59,7 +62,7 @@
 	          </ul>
 	        </li>
 	        <li><a href="#">money</a></li>
-	        <li class="active"><a href="#">money</a></li>
+	        <li><a href="#">money</a></li>
 	      </ul>
 	    </div><!--/.nav-collapse -->
 	  </div>
@@ -72,9 +75,11 @@
         @yield('content')
     </div>
 
-        {{ HTML::script('js/jquery-1.11.0.min.js') }}
+        {{ HTML::script('js/datatables.js') }}
         {{ HTML::script('js/bootstrap.min.js') }}
         {{ HTML::script('js/bootstrap-datepicker.js') }}
+        {{ HTML::script('js/datatables.js') }}
+        
         @yield('footer')
     </body>
 </html>

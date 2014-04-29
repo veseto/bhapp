@@ -4,9 +4,10 @@
     <!-- breadcrumbs -->
     <div class="container">
       <ol class="breadcrumb">
-        <li><a href="{{URL::to('home')}}">Home</a></li>
-        <li><a href="#">Germany</a></li>
-        <li><a href="#">3.Liga</a></li>
+        <li><a href="{{ URL::to('home') }}">Home</a></li>
+        <li><a href="{{ URL::to('countries') }}">Countries</a></li>
+        <li>{{ HTML::linkAction('LeagueDetailsController@getLeaguesForCountry', array_get($data, 'country'), array('country' => array_get($data, 'country'))) }}</li>
+        <li>{{ HTML::linkAction('LeagueDetailsController@getImportedSeasons', array_get($data, 'league'), array('country' => array_get($data, 'country'), 'league' => array_get($data, 'league'))) }}</li>
         <li class="active">Fixtures</li>
       </ol>
       <div class="pull-right">
@@ -21,7 +22,7 @@
         <div class="col-xs-6 noMarginPadding">
           <!-- main content -->
           <div class="page-header">
-            <h3 class="noMarginPadding">Stats for  {{ array_get($stats, 'country') }} / {{ array_get($stats, 'leagueName') }} <small>{{ array_get($stats, 'season') }}</small></h3>
+            <h3 class="noMarginPadding">Stats for  {{ array_get($data, 'country') }} / {{ array_get($data, 'league') }} <small>{{ array_get($data, 'season') }}</small></h3>
           </div>
         </div>
         <!-- <div class="col-xs-3" style="padding-top:4px;text-align:right;">
@@ -43,18 +44,18 @@
 
 @section('content')
     <div>
-    All matches {{ array_get($stats, 'all') }}<br>
-    Draw matches {{ array_get($stats, 'draw') }}<br>
-    Home wins {{ array_get($stats, 'home') }}<br>
-    Away wins {{ array_get($stats, 'away') }}<br>
+    All matches {{ array_get($data, 'all') }}<br>
+    Draw matches {{ array_get($data, 'draw') }}<br>
+    Home wins {{ array_get($data, 'home') }}<br>
+    Away wins {{ array_get($data, 'away') }}<br>
     </div>
     <div>
-    @foreach(array_get($stats, 'distResults') as $dist)
+    @foreach(array_get($data, 'distResults') as $dist)
     	{{ $dist->homeGoals }} - {{ $dist->awayGoals }} : {{ $dist->total }} <br>
  	@endforeach
  	</div>
  	<table>
-    @foreach(array_get($stats, 'seq') as $team => $seq)
+    @foreach(array_get($data, 'seq') as $team => $seq)
     	<tr>
             <td><strong>{{$team}}</strong></td>
             <td> 
@@ -71,11 +72,11 @@
         </tr>
 	@endforeach
     </table>
- 	@foreach(array_get($stats, 'sSeq') as $sSeq)
+ 	@foreach(array_get($data, 'sSeq') as $sSeq)
         @if($sSeq->resultShort == 'H' || $sSeq->resultShort == 'A')
-            <button type="button" class="btn btn-success btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
+            <button title="({{$sSeq->homeGoals}}:{{$sSeq->awayGoals}}){{$sSeq->home}}-{{$sSeq->away}}&#13;{{$sSeq->matchDate}} {{$sSeq->matchTime}}" type="button" class="btn btn-success btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
         @else 
-            <button type="button" class="btn btn-warning btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
+            <button title="({{$sSeq->homeGoals}}:{{$sSeq->awayGoals}}){{$sSeq->home}}-{{$sSeq->away}}&#13;{{$sSeq->matchDate}} {{$sSeq->matchTime}}" type="button" class="btn btn-warning btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
         @endif
  	@endforeach
  	

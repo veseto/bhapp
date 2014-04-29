@@ -3,6 +3,8 @@
 	ini_set('display_errors', 'on');
 	ini_set('display_errors', 1);
 
+	$file = $_GET['leagueId'].'.sql';
+	$str='';
 	$start = time();
 
 	function get_http_response_code($url) {
@@ -10,11 +12,12 @@
 	    return substr($headers[0], 9, 3);
 	}
 
-	function parseMatchDetails($baseUrl, $matchId, $season) {
+	function parseMatchDetails($baseUrl, $matchId, $season, $file) {
 		include("../includes/connection.php");
 		$url = $baseUrl."matchdetails.php?matchid=".$matchId;
+		echo "***  $matchId ***";
 		if(get_http_response_code($url) != "200"){
-			echo "Wrong match details url! --> $url";
+			//  "Wrong match details url! --> $url";
 			return;
 		}
 		$data = file_get_contents($url);
@@ -57,7 +60,7 @@
 				$reason = $tmp->getElementsByTagName('td')->item(0)->nodeValue;
 			}
 		}
-		$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals where matchId='$matchId'";
+		$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals where id='$matchId'";
 
 		if ($scoreRows->item(2) != null) {
 			$results = $scoreRows->item(2)->getElementsByTagName('td')->item(0)->nodeValue;
@@ -74,7 +77,7 @@
 				$halves = explode(', ', $results);
 				if (count($halves) == 1) {
 					$state = $results;
-					$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals, state='$state' where matchId='$matchId'";
+					$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals, state='$state' where id='$matchId'";
 				} else {
 					$ha1 = explode(':', $halves[0]);
 					$h1 = $ha1[0];
@@ -82,47 +85,49 @@
 					$ha2 = explode(':', $halves[1]);
 					$h2 = $ha2[0];
 					$a2 = $ha2[1];
-					$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals, homeGoals1H=$h1, homeGoals2H=$h2, awayGoals1H=$a1, awayGoals2H=$a2, state='$state' where matchId='$matchId'";
+					$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals, homeGoals1H=$h1, homeGoals2H=$h2, awayGoals1H=$a1, awayGoals2H=$a2, state='$state' where id='$matchId'";
 				}
 			} 
 		} else {
-				$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals where matchId='$matchId'";
+				$q1 = "UPDATE `match` set matchDate='$strdate', home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals where id='$matchId'";
 		}
 
 		// echo "$matchId $home - $away <br>$homeGoals:$awayGoals <br>$h1:$a1 $h2:$a2<br>***********************************<br>";
 		// $q1 = "UPDATE `match` set home='$home', away='$away', resultShort='$resultShort', homeGoals=$homeGoals, awayGoals=$awayGoals, homeGoals1H=$h1, homeGoals2H=$h2, awayGoals1H=$a1, awayGoals2H=$a2 where matchId='$matchId'";
 		// echo "$q1";
-		$mysqli->query($q1);
-		echo $mysqli->error;
+		file_put_contents($file, $q1.";", FILE_APPEND);
+
+		// $mysqli->query($q1);
+		// echo $mysqli->error;
 
 		if ($tables->length == 3) {
 			$class = $tables->item(2)->parentNode->getAttribute("class");
 			if ($class == 'fr') {
-				processGoals($tables->item(2), "away", $matchId);
+				processGoals($tables->item(2), "away", $matchId, $file);
 			} else if ($class = 'fl') {
-				processGoals($tables->item(2), "home", $matchId);
+				processGoals($tables->item(2), "home", $matchId, $file);
 			}
 		}
 		if ($tables->length == 4) {
 			$class = $tables->item(2)->parentNode->getAttribute("class");
 			if ($class == 'fr') {
-				processGoals($tables->item(2), "away", $matchId);
-				processGoals($tables->item(3), "home", $matchId);
+				processGoals($tables->item(2), "away", $matchId, $file);
+				processGoals($tables->item(3), "home", $matchId, $file);
 			} else if ($class = 'fl') {
-				processGoals($tables->item(2), "home", $matchId);
-				processGoals($tables->item(3), "away", $matchId);
+				processGoals($tables->item(2), "home", $matchId, $file);
+				processGoals($tables->item(3), "away", $matchId, $file);
 			}
 		}  
 
 		//echo getMatchOdds($matchId);
 	}
-	function processGoals($table, $team, $matchId) {
+	function processGoals($table, $team, $matchId, $file) {
 		include("../includes/connection.php");
 		$rows = $table->getElementsByTagName("tr");
 		foreach ($rows as $row) {
 			$minute = 0;
 			$cols = $row->getElementsByTagName('td');
-			$player = mysql_escape_string($row->getElementsByTagName('th')->item(0)->nodeValue);			
+			$player = mysql_real_escape_string($row->getElementsByTagName('th')->item(0)->nodeValue);			
 			if ($team == 'home') {
 				$reason = $cols->item(0)->nodeValue;
 				$minute = str_replace('.', "", $cols->item(1)->nodeValue);
@@ -132,15 +137,17 @@
 				$minute = str_replace('.', "", $cols->item(0)->nodeValue);
 				//$player = $cols->item(1)->nodeValue;
 		 	}
-		 	if ($minute == '') {
+		 	if (trim($minute) == '') {
 		 		$minute = 0;
 		 	}
-		 	$q3 = "SELECT count(*) from goals where matchId='$matchId' and minute=$minute and player='$player'";
+		 	$q3 = "SELECT count(*) from goals where match_id='$matchId' and minute=$minute and player='$player'";
 		 	echo "$q3<br>";
 		 	$count = $mysqli->query($q3)->fetch_array()[0];
 		 	if ($count < 1) {
-			 	$q2 = "insert into goals (matchId, reason, minute, player) values ('$matchId', '$reason', $minute, '$player')";
-			 	$mysqli->query($q2);
+			 	$q2 = "insert into goals (match_id, reason, minute, player) values ('$matchId', '$reason', $minute, '$player')";
+			 		file_put_contents($file, $q2.";", FILE_APPEND);
+
+			 	// $mysqli->query($q2);
 			 	// return "$reason $minute $player <br>";	
 			 }// } else {
 			 // 	return "**********inserted**********<br>";
@@ -150,13 +157,13 @@
 	}
 
 
-	function getMatchOdds($matchId) {
+	function getMatchOdds($matchId, $file) {
 		$odds = "";
 		include ("../includes/connection.php");
 		$res = $mysqli -> query("SELECT * from bookmaker");
 		$bookmakers = array();
 		while ($b = $res -> fetch_assoc()) {
-			$bookmakers[$b['bookmakerId']]=$b['bookmakerName'];
+			$bookmakers[$b['id']]=$b['bookmakerName'];
 		}
 		$url = "http://www.betexplorer.com/gres/ajax-matchodds.php?t=n&e=$matchId&b=1x2";
 		$data = json_decode(file_get_contents($url))->odds;
@@ -180,13 +187,14 @@
 						foreach ($bookmakers as $key => $value) {
 						 	// echo $b[0]." ".$h1->nodeValue;
 					    	if (strpos($h1->nodeValue, $value)) {
-					    		$q3 = "SELECT count(*) from odds1x2 where matchId='$matchId' and bookmakerId=$key";
+					    		$q3 = "SELECT count(*) from odds1x2 where match_id='$matchId' and bookmaker_id=$key";
 							 	// echo "$q3<br>";
 							 	$count = $mysqli->query($q3)->fetch_array()[0];
 							 	if ($count < 1) {
-						    		$q0 = "INSERT INTO odds1x2 (bookmakerId, matchId, odds1, oddsX, odds2) values ($key, '$matchId', $odds1, $oddsX, $odds2)";
-						    		$mysqli->query($q0);
-						    		
+						    		$q0 = "INSERT INTO odds1x2 (bookmaker_id, match_id, odds1, oddsX, odds2) values ($key, '$matchId', '$odds1', '$oddsX', '$odds2')";
+						    		// $mysqli->query($q0);
+						    			file_put_contents($file, $q0.";", FILE_APPEND);
+
 						    		$odds = $q0."<br>";
 						    	}
 					    	}
@@ -199,16 +207,15 @@
 	}
 	$baseUrl = "http://www.betexplorer.com/soccer/";//poland/ekstraklasa-2010-2011/";
 	// $matchId = "hrhPTNlp";
-
+	$start = time();
 	//$q = "SELECT * from `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where leagueDetails.leagueId=4";
 	// echo "$q<br>";
-	$start = time();
-	$q = "SELECT * FROM `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where resultShort=''";
+	$q = "SELECT `match`.id, country, fullName, season, alternativeName, alternativeName2 FROM `match` left join leagueDetails on leagueDetails.id=`match`.league_details_id where resultShort='' and leagueDetails.id=".$_GET['leagueId']." ";
 	$res = $mysqli->query($q);
-	echo $mysqli->error;
+	// echo $mysqli->error;
 	while ($row = $res->fetch_assoc()) {
 		$url = $baseUrl.$row['country'].'/'.$row['fullName'].'-'.$row['season'].'/';
-				echo "$url";
+				// echo "$url";
 
 		if(get_http_response_code($url) != "200"){
 			$url = $baseUrl.$row['country'].'/'.$row['alternativeName'].'-'.$row['season'].'/';
@@ -217,14 +224,15 @@
 			$url = $baseUrl.$row['country'].'/'.$row['alternativeName2'].'-'.$row['season'].'/';
 		}
 		if(get_http_response_code($url) != "200"){
-			echo "boo";
+			// echo "boo";
 			return;
 		}
-		echo getMatchOdds($row['matchId']);
-		echo parseMatchDetails($url, $row['matchId'], $row['season']);
+		getMatchOdds($row['id'], $file);
+		parseMatchDetails($url, $row['id'], $row['season'], $file);
 	}
-
 	$end = time();
-	echo ($end-$start)." sec for 200 matches";
+
+
+	echo ($end - $start)." sec for 200 matches";
 
 ?>

@@ -4,10 +4,7 @@
 	<!-- breadcrumbs -->
 	<div class="container">
 	  <ol class="breadcrumb">
-	   	<li><a href="{{ URL::to('home') }}">Home</a></li>
-        <li><a href="{{ URL::to('countries') }}">Countries</a></li>
-        <li>{{ HTML::linkAction('LeagueDetailsController@getLeaguesForCountry', array_get($data, 'country'), array('country' => array_get($data, 'country'))) }}</li>
-	    <li class="active">{{array_get($data, 'league')}}</li>
+	    <li class="active">Home</li>
 	  </ol>
 	  <div class="pull-right">
 	    <span>fefence | <a href="#">settings</a> | <a href="#">log out</a></span>
@@ -25,7 +22,7 @@
 	      </div>
 	    </div>
 	    <div class="col-xs-3" style="padding-top:4px;text-align:right;">
-			<span><a href="#" class="btn-sm btn-default"></a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">>></a>
+			<span><a href="#" class="btn-sm btn-default"><<</a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">>></a>
 	    </div>
 	    <div class="col-xs-3 noMarginPadding">
 	      <!-- calendar -->
@@ -41,9 +38,11 @@
 @stop
 
 @section('content')
-        @foreach(array_get($data, 'seasons') as $season)
-    	<a href="{{$season->season}}/stats">{{ $season->season }}</a><br>
- 	@endforeach
+	
+	 {{ Datatable::table()
+    ->addColumn('home','away')       // these are the column headings to be shown
+    ->setUrl(route('api.matches'))   // this is the route where data will be retrieved
+    ->render() }}
 @stop
 
 @section('footer')
@@ -53,11 +52,11 @@
 	      </div>
 	    </div>
 	<script type="text/javascript">
-	$(document).ready({
-		$('#country').on('click', function(){
-			alert("noooo");
-		});
-	});
+	// $(document).ready(function(){
+	// 	$('#country').on("click", function(){
+ //        	alert("boo");
+ //        });
+	// });
 
 	  $('#datepickid div').datepicker({
 	    format: "dd.mm.yy",

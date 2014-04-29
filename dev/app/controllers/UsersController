@@ -1,0 +1,16 @@
+<?php
+
+class UsersController extends BaseController {
+	public function getDatatable()
+    {
+        return Datatable::collection(LeagueDetails::all(array('fullName','country')))
+        ->showColumns('fullName', 'fullName')
+        ->searchColumns('fullName')
+        ->orderColumns('fullName','fullName')
+        ->make();
+    }
+
+    public function boo() {
+    	return View::make("users");
+    }
+}

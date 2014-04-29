@@ -49,11 +49,11 @@
 	      </div>
 	    </div>
 	<script type="text/javascript">
-	$(document).ready({
-		$('#country').on('click', function(){
-			alert("noooo");
-		});
-	});
+	// $(document).ready(function(){
+	// 	$('#country').on("click", function(){
+ //        	alert("boo");
+ //        });
+	// });
 
 	  $('#datepickid div').datepicker({
 	    format: "dd.mm.yy",

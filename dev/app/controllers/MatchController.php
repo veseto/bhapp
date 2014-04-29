@@ -1,3 +1,4 @@
+
 <?php
 
 class MatchController extends BaseController {
@@ -19,10 +20,10 @@ class MatchController extends BaseController {
 		$homeCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'H')->count();
 		$awayCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'A')->count();
 		$seq = $this->getSequences($country, $leagueName, $season);
-		$sSeq = Match::matchesForSeason($leagueId, $season)->get(array('resultShort'));
+		$sSeq = Match::matchesForSeason($leagueId, $season)->get(array('resultShort', 'home', 'away', 'matchDate', 'matchTime', 'homeGoals', 'awayGoals'));
 		
 
-		$array = array('leagueName' => $leagueName, 
+		$array = array('league' => $leagueName, 
 						'country' => $country,
 						'season' => $season,
 						'all' => $allCount, 
@@ -34,7 +35,7 @@ class MatchController extends BaseController {
 						'sSeq' => $sSeq);
 
 		//->nest('seq',  'sequences', array('sequences' => $seq)
-		return View::make('stats')->with('stats', $array);
+		return View::make('stats')->with('data', $array);
 	
 	}
 
@@ -80,5 +81,23 @@ class MatchController extends BaseController {
                  ->groupBy('homeGoals', 'awayGoals')
                  ->get();
 	}
+
+	public function getTodaysMatches(){
+		// $d = date("Y-m-d", time());
+		// $matches = Match::where('id', '=', '000cQmf2')->get();
+
+		return View::make('matches');
+	}
+
+
+
+	 public function getDatatable()
+    {
+        return Datatable::collection(Match::where('league_details_id', '=', '1')->get(array('home','away')))
+        ->showColumns('home', 'away')
+        ->searchColumns('home', 'away')
+        ->orderColumns('home','away')
+        ->make();
+    }
 
 }

@@ -16,24 +16,15 @@ Route::get('/home', function()
 	return View::make('home');
 });
 
-Route::get('countries', function()
-{
-    $countries = LeagueDetails::distinct()->get(array('country'));
+Route::get('matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'));
+Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'));
 
-    return View::make('countries')->with('countries', $countries);
-});
 
-Route::get('{country}', function($country)
-{
-    $leagues = LeagueDetails::where('country', '=', $country)->get();
-    $arr = array('leagues' => $leagues, 'country' => $country);
+Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'));
 
-    return View::make('leagues')->with('data', $arr);
-});
-
+Route::get('{country}', array('as' => 'country', 'uses' => 'LeagueDetailsController@getLeaguesForCountry'));
 
 Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
 
 Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));
 
-Route::get('{country}/{league}/{season}/sequences', array('as' => 'sequences', 'uses' => "MatchController@getSequences"));
