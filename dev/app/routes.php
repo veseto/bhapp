@@ -11,9 +11,9 @@
 |
 */
 
-Route::get('/', function()
+Route::get('/home', function()
 {
-	return View::make('hello');
+	return View::make('home');
 });
 
 Route::get('countries', function()
@@ -26,9 +26,11 @@ Route::get('countries', function()
 Route::get('{country}', function($country)
 {
     $leagues = LeagueDetails::where('country', '=', $country)->get();
+    $arr = array('leagues' => $leagues, 'country' => $country);
 
-    return View::make('leagues')->with('leagues', $leagues);
+    return View::make('leagues')->with('data', $arr);
 });
+
 
 Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
 

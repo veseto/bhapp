@@ -31,15 +31,18 @@ hr {
   width: 100%;
   height: 30px;
 }
-.container {
-  width: 1170px !important;
+.bo {
+  border:1px solid red;
+}
+/*.container {
+  width: 1050px !important;
 }
 .mainNav ul {
 
-}
+}*/
 .mainNav ul li {
   /*width: 120px;*/
-  font-size: 120%;
+  font-size: 100%;
 }
 .navbar-right {
   margin-right: 0px !important;
@@ -51,7 +54,7 @@ ol {
 .breadcrumb {
   background-color: #fff !important;
   float: left;
-  margin-bottom: 15px !important;
+  margin-bottom:15px !important;
 }
 .page-header {
   margin-top: 0px !important;
@@ -68,9 +71,12 @@ ol {
 .linksUnder {
   text-align: center;
 }
+.w25 {
+  width: 25px !important;
+}
 .noMarginPadding {
-  margin: 0px;
-  padding: 0px;
+  margin:0px;
+  padding:0px;
 }
 /* Always float the navbar header */
 .navbar-header {

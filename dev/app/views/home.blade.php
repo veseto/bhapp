@@ -4,10 +4,7 @@
 	<!-- breadcrumbs -->
 	<div class="container">
 	  <ol class="breadcrumb">
-        <li><a href="{{URL::to('home')}}">Home</a></li>
-        <li><a href="{{URL::to('countries')}}">Countries</a></li>
-	    <li class="active">{{array_get($data, 'country')}}</li>
-
+	    <li class="active">Home</li>
 	  </ol>
 	  <div class="pull-right">
 	    <span>fefence | <a href="#">settings</a> | <a href="#">log out</a></span>
@@ -25,7 +22,7 @@
 	      </div>
 	    </div>
 	    <div class="col-xs-3" style="padding-top:4px;text-align:right;">
-			<span><a href="#" class="btn-sm btn-default"></a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">>></a>
+			<span><a href="#" class="btn-sm btn-default"><<</a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">>></a>
 	    </div>
 	    <div class="col-xs-3 noMarginPadding">
 	      <!-- calendar -->
@@ -41,9 +38,8 @@
 @stop
 
 @section('content')
-    @foreach(array_get($data, 'leagues') as $league)
-    	<a href="{{ URL::route('archive', array('country' => $league->country, 'league' => $league->fullName)) }}">{{ $league->fullName }}</a><br>
- 	@endforeach
+
+	
 @stop
 
 @section('footer')
