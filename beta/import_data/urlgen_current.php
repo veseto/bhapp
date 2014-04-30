@@ -8,7 +8,7 @@
 	$start = time();
 
 	$baseUrl="http://www.betexplorer.com/soccer/";
-	$res = $mysqli->query("SELECT * FROM leagueDetails where id=1");
+	$res = $mysqli->query("SELECT * FROM leagueDetails");
 	$leagues = array();
 	while ($row = $res->fetch_assoc()) {
 		array_push($leagues, $row);
@@ -29,9 +29,9 @@
 				$alternativeUrl2 = $baseUrl.$league['country']."/".$league['alternativeName2']."/";
 				$alternativeUrl3 = $baseUrl.$league['country']."/".$league['fullName']."/";
 				$alternativeUrl4 = $baseUrl.$league['country']."/".$league['alternativeName']."/";
-				echo "$url<br>$alternativeUrl2 <br> $alternativeUrl3<br> $alternativeUrl4<br>";
+				// echo "$url<br>$alternativeUrl2 <br> $alternativeUrl3<br> $alternativeUrl4<br>";
 				// echo "$url, $alternativeUrl, $season, ".$league['leagueId'];
-				parseResults($url, $alternativeUrl, $alternativeUrl2, $alternativeUrl3, $alternativeUrl4, $season, $league['id']);
+				echo parseResults($url, $alternativeUrl, $alternativeUrl2, $alternativeUrl3, $alternativeUrl4, $season, $league['id']);
 			}
 		}
 	$end = time();

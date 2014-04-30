@@ -27,4 +27,3 @@ Route::get('{country}', array('as' => 'country', 'uses' => 'LeagueDetailsControl
 Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
 
 Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));
-

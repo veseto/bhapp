@@ -56,17 +56,17 @@ class MatchController extends BaseController {
                       ->orWhere('away', '=', $regexp);
             })
 			->orderBy('matchDate', 'desc')->get();
-			foreach ($matches as $match) {
-				if ($match->resultShort == 'D') {
-					array_push($res, 'D');
-				} else if (($team->home === $match->home and $match->resultShort == 'H') or ($team->home === $match->away and $match->resultShort == 'A')) {
-					array_push($res, 'W');
-				} else {
-					array_push($res, 'L');
-				}
-				// array_push($seq[$team->home], $res);
-			}
-			$seq = array_add($seq, $team->home, $res);
+			// foreach ($matches as $match) {
+			// 	if ($match->resultShort == 'D') {
+			// 		array_push($res, 'D');
+			// 	} else if (($team->home === $match->home and $match->resultShort == 'H') or ($team->home === $match->away and $match->resultShort == 'A')) {
+			// 		array_push($res, 'W');
+			// 	} else {
+			// 		array_push($res, 'L');
+			// 	}
+			// 	// array_push($seq[$team->home], $res);
+			// }
+			$seq = array_add($seq, $team->home, $matches);
 		}	
 
 		return $seq;

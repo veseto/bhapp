@@ -11,6 +11,7 @@
 	    <!-- css -->
         {{ HTML::style('css/bootstrap.min.css') }}
         {{ HTML::style('css/custom.css') }}
+        {{ HTML::style('css/jquery.qtip.css') }}
         {{ HTML::style('css/datepicker3.css') }}
         {{ HTML::style('css/datatables.css') }}
         {{ HTML::style('css/datatables_themeroller.css') }}
@@ -67,7 +68,6 @@
 	    </div><!--/.nav-collapse -->
 	  </div>
 	</div>
-
         @yield('breadcrumbs')
 
         @yield('pageHeader')
@@ -78,7 +78,7 @@
         {{ HTML::script('js/datatables.js') }}
         {{ HTML::script('js/bootstrap.min.js') }}
         {{ HTML::script('js/bootstrap-datepicker.js') }}
-        {{ HTML::script('js/datatables.js') }}
+        {{ HTML::script('js/jquery.qtip.js') }}
         
         @yield('footer')
     </body>

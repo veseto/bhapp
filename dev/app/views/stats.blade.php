@@ -22,7 +22,7 @@
         <div class="col-xs-6 noMarginPadding">
           <!-- main content -->
           <div class="page-header">
-            <h3 class="noMarginPadding">Stats for  {{ array_get($data, 'country') }} / {{ array_get($data, 'league') }} <small>{{ array_get($data, 'season') }}</small></h3>
+            <h3 style="margin-top: 0px;">{{ array_get($data, 'country') }} - {{ array_get($data, 'league') }} <small>{{ array_get($data, 'season') }}</small></h3>
           </div>
         </div>
         <!-- <div class="col-xs-3" style="padding-top:4px;text-align:right;">
@@ -38,79 +38,157 @@
         </div> -->
       </div>
       
-      <hr/>
+      <!-- <hr/> -->
 @stop
 
 
 @section('content')
-    <div>
-    All matches {{ array_get($data, 'all') }}<br>
-    Draw matches {{ array_get($data, 'draw') }}<br>
-    Home wins {{ array_get($data, 'home') }}<br>
-    Away wins {{ array_get($data, 'away') }}<br>
-    </div>
-    <div>
-    @foreach(array_get($data, 'distResults') as $dist)
-    	{{ $dist->homeGoals }} - {{ $dist->awayGoals }} : {{ $dist->total }} <br>
- 	@endforeach
- 	</div>
- 	<table>
+
+<!-- table 1x2 -->
+    <table class="table table-bordered">
+      <tr>
+          <th>League progress</th>
+          <th width="25%"># of matches</th>
+          <th width="25%">%</th>
+      </tr>
+      <tr>
+        <td>Matches total</td>
+        <td>{{ array_get($data, 'all') }}</td>
+        <td>100 %</td>
+      </tr>
+      <tr>
+        <td>Home win</td>
+        <td>{{ array_get($data, 'home') }}</td>
+        <td>?? %</td>
+      </tr>
+      <tr>
+        <td>Draw</td>
+        <td>{{ array_get($data, 'draw') }}</td>
+        <td>?? %</td>
+      </tr>
+      <tr>
+        <td>Away win</td>
+        <td>{{ array_get($data, 'away') }}</td>
+        <td>?? %</td>
+      </tr>
+    </table>
+
+<!-- table exact score -->
+    <table class="table table-bordered">
+      <tr>
+          <th>Exact score</th>
+          <th width="25%"># of occurences</th>
+          <th width="25%">%</th>
+      </tr>
+        @foreach(array_get($data, 'distResults') as $dist)
+        <tr>
+            <td>{{ $dist->homeGoals }} - {{ $dist->awayGoals }}</td>
+            <td>{{ $dist->total }}</td>
+            <td>?? %</td>
+        </tr>
+        @endforeach
+    </table>
+
+<!-- table goals scored -->
+    <table class="table table-bordered">
+      <tr>
+          <th>Goals</th>
+          <th width="25%">Total</th>
+          <th width="25%">Per Match</th>
+      </tr>
+      <tr>
+        <td>Goals scored</td>
+        <td>??</td>
+        <td>?? %</td>
+      </tr>
+      <tr>
+        <td>Home goals</td>
+        <td>??</td>
+        <td>?? %</td>
+      </tr>
+      <tr>
+        <td>Away goals</td>
+        <td>?? </td>
+        <td>?? %</td>
+      </tr>
+    </table>
+
+<!-- table goals scored -->
+    <table class="table table-bordered">
+      <tr>
+          <th>Over/Under 2.5 stats</th>
+          <th width="25%">Total</th>
+          <th width="25%">%</th>
+      </tr>
+      <tr>
+        <td>Over 2.5</td>
+        <td>??</td>
+        <td>?? %</td>
+      </tr>
+      <tr>
+        <td>Under 2.5</td>
+        <td>??</td>
+        <td>?? %</td>
+      </tr>
+    </table>
+
+<!-- table PPS sequences -->
+    <table class="table">
     @foreach(array_get($data, 'seq') as $team => $seq)
-    	<tr>
+        <tr>
             <td><strong>{{$team}}</strong></td>
-            <td> 
-        	@foreach($seq as $s)
-    	    	@if($s == 'W')
-                    <button type="button" class="btn btn-success btn-xs w25">{{$s}}</button>&nbsp;
-                @elseif($s == 'L') 
-                    <button type="button" class="btn btn-danger btn-xs w25">{{$s}}</button>&nbsp;
-                @else
-                    <button type="button" class="btn btn-warning btn-xs w25">{{$s}}</button>&nbsp;
-                @endif  
-    	 	@endforeach
+            <td>
+            @foreach($seq as $s)
+                <a href="#" type="button" data-toggle="tooltip" data-placement="top" title="<strong>{{$s->homeGoals}}:{{$s->awayGoals}}</strong>&nbsp;({{$s->home}}&nbsp;-&nbsp;{{$s->away}})<br/>{{ date("d.m.Y",strtotime($s->matchDate)) }}"  
+                @if($s->resultShort == 'D')
+                    {{'class="btn btn-warning btn-xs w25 hasTooltip">D'}} 
+                @elseif(($s->resultShort == 'H' && $s->home == $team) || ($s->resultShort == 'A' && $s->away == $team))
+                    {{'class="btn btn-success btn-xs w25 hasTooltip">W'}}
+                @else 
+                    {{'class="btn btn-danger btn-xs w25 hasTooltip">L'}}
+                @endif
+                </a>
+            @endforeach
             </td>
         </tr>
-	@endforeach
+    @endforeach
     </table>
- 	@foreach(array_get($data, 'sSeq') as $sSeq)
-        @if($sSeq->resultShort == 'H' || $sSeq->resultShort == 'A')
-            <button title="({{$sSeq->homeGoals}}:{{$sSeq->awayGoals}}){{$sSeq->home}}-{{$sSeq->away}}&#13;{{$sSeq->matchDate}} {{$sSeq->matchTime}}" type="button" class="btn btn-success btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
-        @else 
-            <button title="({{$sSeq->homeGoals}}:{{$sSeq->awayGoals}}){{$sSeq->home}}-{{$sSeq->away}}&#13;{{$sSeq->matchDate}} {{$sSeq->matchTime}}" type="button" class="btn btn-warning btn-xs w25">{{$sSeq->resultShort}}</button>&nbsp;
-        @endif
- 	@endforeach
- 	
+
+<!-- table PPM sequence -->
+    <div class="container noMarginPadding">
+    <span class="text-default">Starts here</span>&nbsp;<span class="text-danger">Top 5 longest series: 13, 12, 12, 9, 5 (<-- hardcoded data, must re-visit!)</span><br/>
+     	@foreach(array_get($data, 'sSeq') as $sSeq)
+        <a href="#" type="button" data-toggle="tooltip" data-placement="top" title="<strong>{{$sSeq->homeGoals}}:{{$sSeq->awayGoals}}</strong>&nbsp;({{$sSeq->home}}&nbsp;-&nbsp;{{$sSeq->away}})<br/>{{ date("d.m.Y",strtotime($sSeq->matchDate)) }}" class="btn hasTooltip 
+            @if($sSeq->resultShort == 'H' || $sSeq->resultShort == 'A')
+                {{"btn-success"}} 
+            @else 
+                {{"btn-warning"}}
+            @endif
+            btn-xs w25">{{$sSeq->resultShort}}</a>
+     	@endforeach
+ 	</div>
 @stop
 
 @section('footer')
-        <div id="footer">
-          <div class="container">
-            <p class="text-muted"> today's matches: <strong><a href="#">43</a></strong><strong> | </strong>BSF for today's matches: <strong>2213€</strong><strong> | </strong>Total BSF: <strong>5346€</strong></p>
-          </div>
-        </div>
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted"> today's matches: <strong><a href="#" class="hasTooltip" title="43">43</a></strong><strong> | </strong>BSF for today's matches: <strong>2213€</strong><strong> | </strong>Total BSF: <strong>5346€</strong></p>
+      </div>
+    </div>
     <script type="text/javascript">
-    //   $('#datepickid div').datepicker({
-    //     format: "dd.mm.yy",
-    //     weekStart: 1,
-    //     orientation: "top auto",
-    //     // autoclose: false,
-    //     todayHighlight: true,
-    //     multidate: true,
-    //     multidateSeparator: " to ",
-    //     beforeShowDay: function (date) {
-    //       if (date.getMonth() == (new Date()).getMonth())
-    //         switch (date.getDate()){
-    //           case 4:
-    //             return {
-    //               tooltip: 'Example tooltip',
-    //               classes: 'text-danger'
-    //             };
-    //           case 8:
-    //             return false;
-    //           case 12:
-    //             return "green";
-    //         }
-    //     }
-    // });
+    // Grab all elements with the class "hasTooltip"
+    $('.hasTooltip').each(function() { // Notice the .each() loop, discussed below
+        $(this).qtip({
+            content: {
+                text: $(this).attr('title')
+            },
+        style: {
+            classes: 'qtip-light qtip-shadow qtip-rounded'
+        },
+        position: {
+            viewport: $(window)
+        }
+        });
+    });
     </script>
 @stop

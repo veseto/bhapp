@@ -13,7 +13,7 @@
 		include("../includes/connection.php");
 		$workingBaseUrl = $baseUrl;
 		$url = $baseUrl."results/";
-
+		echo "$url<br>";
 		$year = explode('-', $season)[0];
 
 		if(get_http_response_code($url) != "200"){
