@@ -16,9 +16,17 @@ Route::get('/home', function()
 	return View::make('home');
 });
 
-Route::get('matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'));
-Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'));
+Route::get('hello', function()
+{
+	$m = Match::find('000cQmf2');
+	$data['team'] = '';
+	$data['match'] = $m;
+	return View::make('hello')->with('data', $data);
+});
 
+Route::get('/matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'));
+
+Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'));
 
 Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'));
 
@@ -27,3 +35,8 @@ Route::get('{country}', array('as' => 'country', 'uses' => 'LeagueDetailsControl
 Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
 
 Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));
+
+// View::composer('layouts.partials.square', 'SquareComposer');
+// View::composer('layouts.partials.square', function($view) {			
+//   	$view->with('data', $data);
+// });

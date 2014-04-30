@@ -43,6 +43,15 @@
 
 
 @section('content')
+<!-- tabbed nav -->
+<ul class="nav nav-tabs" style="border: none">
+  <!-- <li class="active"><a href="#">Summay</a></li> -->
+  <li><a href="#">Profile</a></li>
+  <li><a href="#">Messages</a></li>
+  <li class="active"><a href="#">Summay</a></li>
+  <li><a href="#">Profile</a></li>
+  <li><a href="#">Messages</a></li>
+</ul>
 
 <!-- table 1x2 -->
     <table class="table table-bordered">
