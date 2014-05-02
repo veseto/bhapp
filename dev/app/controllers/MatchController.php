@@ -13,7 +13,7 @@ class MatchController extends BaseController {
 		
 		$leagueId = LeagueDetails::getId($country, $leagueName);
 		
-		$distResults = $this->getUniqueResults(Match::matchesForSeason($leagueId, $season));
+		$distResults = $this->getUniqueResults($leagueId, $season);
 
 		$allCount = Match::matchesForSeason($leagueId, $season)->count();
 		$drawCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'D')->count();
@@ -74,11 +74,11 @@ class MatchController extends BaseController {
 	}
 
 
-	private function getUniqueResults($matches) {
+	private function getUniqueResults($leagueId, $season) {
 
 		//return $results = Match::groupBy('homeGoals', 'awayGoals')->get(array('homeGoals', 'awayGoals', DB::raw('count(*) as count'));
-		return $matches->select('homeGoals', 'awayGoals', DB::raw('count(*) as total'))
-                 ->groupBy('homeGoals', 'awayGoals')
+		return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season)->select('homeGoals', 'awayGoals', DB::raw('count(*) as total'))
+                 ->groupBy('homeGoals', 'awayGoals')->orderBy('homeGoals', 'ASC')->orderBy('awayGoals', 'ASC')
                  ->get();
 	}
 
@@ -93,10 +93,10 @@ class MatchController extends BaseController {
 
 	 public function getDatatable()
     {
-        return Datatable::collection(Match::where('league_details_id', '=', '1')->get(array('home','away')))
-        ->showColumns('home', 'away')
+        return Datatable::collection(Match::where('league_details_id', '=', '1')->where('season', '=', '2013-2014')->get(array('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')))
+        ->showColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
         ->searchColumns('home', 'away')
-        ->orderColumns('home','away')
+        ->orderColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
         ->make();
     }
 

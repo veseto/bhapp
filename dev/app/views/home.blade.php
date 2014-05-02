@@ -1,15 +1,12 @@
 @extends('layout')
 
 @section('breadcrumbs')
-	<!-- breadcrumbs -->
-	<div class="container">
-	  <ol class="breadcrumb">
-	    <li class="active">Home</li>
-	  </ol>
-	  <div class="pull-right">
-	    <span>fefence | <a href="#">settings</a> | <a href="#">log out</a></span>
-	  </div>
-	</div>
+	<?php
+		$list = array();
+		$active = 'Home';
+		$elements = array('active' => $active, 'list' => $list);
+	?>
+	@include('layouts.partials.breadcrumbs', array('elements' => $elements))
 @stop
 
 @section('pageHeader')
@@ -21,33 +18,22 @@
 	        <h3 class="noMarginPadding">Today's matches <small>28-Apr-14 (Mon)</small></h3>
 	      </div>
 	    </div>
-	    <div class="col-xs-3" style="padding-top:4px;text-align:right;">
-			<span><a href="#" class="btn-sm btn-default"><<</a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">>></a>
-	    </div>
-	    <div class="col-xs-3 noMarginPadding">
-	      <!-- calendar -->
-	      <div class="form-group pull-right" id="datepickid">
-	        <div class="input-group date">
-	          <input type="text" class="form-control input-sm"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
-	        </div>
-	      </div>
-	    </div>
+	    @include('layouts.partials.calendar')
 	  </div>
 	  
 	  <hr/>
 @stop
 
 @section('content')
-
+  
+  	@if (Session::get('flash_message'))
+		{{ Session::get('flash_message') }}
+	@endif
 	
 @stop
 
 @section('footer')
-	    <div id="footer">
-	      <div class="container">
-	        <p class="text-muted"> today's matches: <strong><a href="#">43</a></strong><strong> | </strong>BSF for today's matches: <strong>2213€</strong><strong> | </strong>Total BSF: <strong>5346€</strong></p>
-	      </div>
-	    </div>
+	    
 	<script type="text/javascript">
 	// $(document).ready(function(){
 	// 	$('#country').on("click", function(){

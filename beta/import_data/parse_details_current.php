@@ -15,7 +15,7 @@
 	function parseMatchDetails($baseUrl, $matchId, $season) {
 		include("../includes/connection.php");
 		$url = $baseUrl."matchdetails.php?matchid=".$matchId;
-		echo "***  $matchId $url ***<br>";
+		// echo "***  $matchId $url ***<br>";
 		if(get_http_response_code($url) != "200"){
 			//  "Wrong match details url! --> $url";
 			return;
@@ -36,8 +36,8 @@
 		$scoreTable = $tables->item(1);
 		$scoreRows = $scoreTable->getElementsByTagName('tr');
 		
-		$home = $scoreRows->item(0)->getElementsByTagName('th')->item(0)->nodeValue;
-		$away = $scoreRows->item(0)->getElementsByTagName('th')->item(1)->nodeValue;
+		$home = $mysqli->escape_string($scoreRows->item(0)->getElementsByTagName('th')->item(0)->nodeValue);
+		$away = $mysqli->escape_string($scoreRows->item(0)->getElementsByTagName('th')->item(1)->nodeValue);
 
 		$tmp = $scoreRows->item(1);
 		$resultShort = '-';
@@ -98,7 +98,7 @@
 		// file_put_contents($file, $q1.";", FILE_APPEND);
 
 		$mysqli->query($q1);
-		// echo $mysqli->error;
+		echo $mysqli->error;
 
 		if ($tables->length == 3) {
 			$class = $tables->item(2)->parentNode->getAttribute("class");
@@ -127,7 +127,7 @@
 		foreach ($rows as $row) {
 			$minute = 0;
 			$cols = $row->getElementsByTagName('td');
-			$player = mysql_real_escape_string($row->getElementsByTagName('th')->item(0)->nodeValue);			
+			$player = str_replace("'", "\'", $row->getElementsByTagName('th')->item(0)->nodeValue);			
 			if ($team == 'home') {
 				$reason = $cols->item(0)->nodeValue;
 				$minute = str_replace('.', "", $cols->item(1)->nodeValue);
@@ -148,6 +148,7 @@
 			 		// file_put_contents($file, $q2.";", FILE_APPEND);
 
 			 	$mysqli->query($q2);
+			 	echo $mysqli->error;
 			 	// return "$reason $minute $player <br>";	
 			 }// } else {
 			 // 	return "**********inserted**********<br>";
@@ -194,7 +195,7 @@
 						    		$q0 = "INSERT INTO odds1x2 (bookmaker_id, match_id, odds1, oddsX, odds2) values ($key, '$matchId', '$odds1', '$oddsX', '$odds2')";
 						    		$mysqli->query($q0);
 						    			// file_put_contents($file, $q0.";", FILE_APPEND);
-
+						    		echo $mysqli->error;
 						    		$odds = $q0."<br>";
 						    	}
 					    	}
@@ -212,7 +213,7 @@
 	// echo "$q<br>";
 	$q = "SELECT *  FROM `match` where resultShort=''";
 	$res = $mysqli->query($q);
-	// echo $mysqli->error;
+	echo $mysqli->error;
 	while ($row = $res->fetch_assoc()) {
 		$url = $baseUrl.'poland/ekstraklasa/';
 		// 		// echo "$url";
@@ -227,8 +228,8 @@
 		// 	// echo "boo";
 		// 	return;
 		// }
-		getMatchOdds($row['id']);
-		parseMatchDetails($url, $row['id'], $row['season']);
+		echo getMatchOdds($row['id']);
+		echo parseMatchDetails($url, $row['id'], $row['season']);
 	}
 	$end = time();
 

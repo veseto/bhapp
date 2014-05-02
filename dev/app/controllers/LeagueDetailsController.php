@@ -5,7 +5,9 @@ class LeagueDetailsController extends BaseController {
 	public function getImportedSeasons($country, $league) {
 		
 		$seasons = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $league)->first()->importedSeasons;
-		$data = array('seasons' => $seasons, 'country' => $country, 'league' => $league);
+		$data = array('seasons' => $seasons, 
+						'country' => $country, 
+						'league' => $league);
 
 		return View::make('seasons')->with('data', $data);
 	}

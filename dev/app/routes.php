@@ -11,10 +11,22 @@
 |
 */
 
+Route::get('login', 'SessionsController@create');
+
+Route::get('logout', 'SessionsController@destroy');
+
+Route::resource('sessions', 'SessionsController', ['only'  => ['create', 'store', 'destroy']]);
+
+Route::get('/settings', function()
+{
+	return View::make('settings');
+})-> before('auth');
+
+
 Route::get('/home', function()
 {
 	return View::make('home');
-});
+})-> before('auth');
 
 Route::get('hello', function()
 {
@@ -22,21 +34,21 @@ Route::get('hello', function()
 	$data['team'] = '';
 	$data['match'] = $m;
 	return View::make('hello')->with('data', $data);
-});
+})-> before('auth');
 
-Route::get('/matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'));
+Route::get('/matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'))-> before('auth');
 
-Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'));
+Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'))-> before('auth');
 
-Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'));
-
-Route::get('{country}', array('as' => 'country', 'uses' => 'LeagueDetailsController@getLeaguesForCountry'));
-
-Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"));
-
-Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"));
+Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'))-> before('auth');
 
 // View::composer('layouts.partials.square', 'SquareComposer');
 // View::composer('layouts.partials.square', function($view) {			
 //   	$view->with('data', $data);
 // });
+
+Route::get('{country}', array('as' => 'country', 'uses' => 'LeagueDetailsController@getLeaguesForCountry'))-> before('auth');
+
+Route::get('{country}/{league}/archive', array('as' => 'archive', 'uses' => "LeagueDetailsController@getImportedSeasons"))-> before('auth');
+
+Route::get('{country}/{league}/{season}/stats', array('as' => 'stats', 'uses' => "MatchController@getStats"))-> before('auth');
