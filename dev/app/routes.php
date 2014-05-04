@@ -11,6 +11,10 @@
 |
 */
 
+Route::get('/calculateseries', "SeriesController@calculatePPSSeries");
+
+Route::get('/show', "SeriesController@getSeries");
+
 Route::get('login', 'SessionsController@create');
 
 Route::get('logout', 'SessionsController@destroy');
@@ -21,7 +25,6 @@ Route::get('/settings', function()
 {
 	return View::make('settings');
 })-> before('auth');
-
 
 Route::get('/home', function()
 {
@@ -39,6 +42,10 @@ Route::get('hello', function()
 Route::get('/matches', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'))-> before('auth');
 
 Route::get('api/matches', array('as'=>'api.matches', 'uses'=>'MatchController@getDatatable'))-> before('auth');
+
+Route::get('/matches2', array('as' => 'matches2', 'uses' => 'MatchController@getTodaysMatches2'))-> before('auth');
+
+Route::get('api/matches2', array('as'=>'api.matches2', 'uses'=>'MatchController@getDatatable2'))-> before('auth');
 
 Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'))-> before('auth');
 

@@ -13,8 +13,10 @@
         {{'class="btn btn-warning btn-xs w25 hasTooltip">D'}} 
     @elseif((array_get($data, 'match')->resultShort == 'H' && array_get($data, 'match')->home == array_get($data, 'team')) || (array_get($data, 'match')->resultShort == 'A' && array_get($data, 'match')->away == array_get($data, 'team')))
         {{'class="btn btn-success btn-xs w25 hasTooltip">W'}}
-    @else 
+    @elseif((array_get($data, 'match')->resultShort == 'A' && array_get($data, 'match')->home == array_get($data, 'team')) || (array_get($data, 'match')->resultShort == 'H' && array_get($data, 'match')->away == array_get($data, 'team')))
         {{'class="btn btn-danger btn-xs w25 hasTooltip">L'}}
+    @else
+        {{'class="btn btn-info btn-xs w25 hasTooltip">?'}}
     @endif
     </a>
 @endif

@@ -3,7 +3,7 @@
     <head>
         <title>
             @section('title')
-			bhapp
+			dev.bhapp.eu
             @show
         </title>
 	    <meta charset="utf-8">

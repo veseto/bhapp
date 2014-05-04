@@ -27,7 +27,7 @@
 		return $time;
 	}
 
-	$res = $mysqli->query("SELECT id FROM `match` where matchTime='00:00:00' and league_details_id in (16, 18, 19, 20, 21)");
+	$res = $mysqli->query("SELECT id FROM `match` where matchTime='00:00:00' and league_details_id in (26, 27, 28, 29, 30)");
 	while ($row = $res->fetch_array()) {
 		$id = $row[0];
 		$time = parseResults($id);

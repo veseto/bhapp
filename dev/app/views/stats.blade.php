@@ -15,7 +15,7 @@
 @stop
 
 @section('pageHeader')
-  @include('layouts.partials.pageheader', array('calendar' => true, 'big' => array_get($data, 'country')." - ".array_get($data, 'league'), 'small' => array_get($data, 'season')))
+  @include('layouts.partials.pageheader', array('calendar' => true, 'big' => array_get($data, 'country')." - ".array_get($data, 'league')))
 @stop
 
 @section('content')
@@ -28,6 +28,10 @@
   <li><a href="#teamsAway">Away</a></li>
   <li><a href="#ppsseq">PPS</a></li>
   <li><a href="#ppmseq">PPM</a></li>
+  <li><a href="#pps1x2">PPS 1X2</a></li>
+  <li><a href="#pps00">PPS 0-0</a></li>
+  <li><a href="#pps11">PPS 1-1</a></li>
+  <li><a href="#pps22">PPS 2-2</a></li>
 </ul>
 
   <div id='content' class="tab-content">
@@ -78,6 +82,123 @@
                   <?php
                     $d = array('team' => $team, 'match' => $s);
                   ?>
+                @include('layouts.partials.square', array('data' => $d))
+              @endforeach
+              </td>
+          </tr>
+      @endforeach
+      </table>
+    </div>
+
+<!-- table PPS 1x2 sequences -->
+    <div class="tab-pane" id="pps1x2">
+      <table class="table table-bordered">
+      @foreach(array_get($data, 'pps1x2') as $team => $series)
+          <tr>
+              <td><strong>{{$team}}</strong></td>
+              <td>
+              @foreach($series as $s)
+                  <?php
+                    $m = new Match;
+                    $m->home = $s->home;
+                    $m->away = $s->away;
+                    $m->matchDate = $s->matchDate;
+                    $m->matchTime = $s->matchTime;
+                    $m->resultShort = $s->resultShort;
+                    $m->homeGoals = $s->homeGoals;
+                    $m->awayGoals = $s->awayGoals;
+                    $d = array('team' => $team, 'match' => $m);
+                  ?>
+                @if($s->current_length > 1)
+                  {{ $s->current_length - 1}}
+                @endif
+                @include('layouts.partials.square', array('data' => $d))
+              @endforeach
+              </td>
+          </tr>
+      @endforeach
+      </table>
+    </div>
+<!-- table PPS 0-0 sequences -->
+    <div class="tab-pane" id="pps00">
+      <table class="table table-bordered">
+      @foreach(array_get($data, 'pps00') as $team => $series)
+          <tr>
+              <td><strong>{{$team}}</strong></td>
+              <td>
+              @foreach($series as $s)
+                  <?php
+                    $m = new Match;
+                    $m->home = $s->home;
+                    $m->away = $s->away;
+                    $m->matchDate = $s->matchDate;
+                    $m->matchTime = $s->matchTime;
+                    $m->resultShort = $s->resultShort;
+                    $m->homeGoals = $s->homeGoals;
+                    $m->awayGoals = $s->awayGoals;
+                    $d = array('team' => $team, 'match' => $m);
+                  ?>
+                @if($s->current_length > 1)
+                  {{ $s->current_length - 1}}
+                @endif
+                @include('layouts.partials.square', array('data' => $d))
+              @endforeach
+              </td>
+          </tr>
+      @endforeach
+      </table>
+    </div>
+<!-- table PPS 1x2 sequences -->
+    <div class="tab-pane" id="pps11">
+      <table class="table table-bordered">
+      @foreach(array_get($data, 'pps11') as $team => $series)
+          <tr>
+              <td><strong>{{$team}}</strong></td>
+              <td>
+              @foreach($series as $s)
+                  <?php
+                    $m = new Match;
+                    $m->home = $s->home;
+                    $m->away = $s->away;
+                    $m->matchDate = $s->matchDate;
+                    $m->matchTime = $s->matchTime;
+                    $m->resultShort = $s->resultShort;
+                    $m->homeGoals = $s->homeGoals;
+                    $m->awayGoals = $s->awayGoals;
+                    $d = array('team' => $team, 'match' => $m);
+                  ?>
+                @if($s->current_length > 1)
+                  {{ $s->current_length - 1}}
+                @endif
+                @include('layouts.partials.square', array('data' => $d))
+              @endforeach
+              </td>
+          </tr>
+      @endforeach
+      </table>
+    </div>
+<!-- table PPS 1x2 sequences -->
+    <div class="tab-pane" id="pps22">
+      <table class="table table-bordered">
+      @foreach(array_get($data, 'pps22') as $team => $series)
+          <tr>
+              <td><strong>{{$team}}</strong></td>
+              <td>
+              @foreach($series as $s)
+                  <?php
+                    $m = new Match;
+                    $m->home = $s->home;
+                    $m->away = $s->away;
+                    $m->matchDate = $s->matchDate;
+                    $m->matchTime = $s->matchTime;
+                    $m->resultShort = $s->resultShort;
+                    $m->homeGoals = $s->homeGoals;
+                    $m->awayGoals = $s->awayGoals;
+                    $d = array('team' => $team, 'match' => $m);
+                  ?>
+                @if($s->current_length > 1)
+                  {{ $s->current_length - 1}}
+                @endif
                 @include('layouts.partials.square', array('data' => $d))
               @endforeach
               </td>
@@ -174,18 +295,18 @@
         </tr>
         <tr>
           <td>Goals scored</td>
-          <td>??</td>
-          <td>?? %</td>
+          <td>{{ array_get($data, 'goals') }}</td>
+          <td>100 %</td>
         </tr>
         <tr>
           <td>Home goals</td>
-          <td>??</td>
-          <td>?? %</td>
+          <td>{{ array_get($data, 'homeGoals') }}</td>
+              <td>{{ round(array_get($data, 'homeGoals')/array_get($data, 'goals')*100, 2, PHP_ROUND_HALF_UP) }} %</td>
         </tr>
         <tr>
           <td>Away goals</td>
-          <td>?? </td>
-          <td>?? %</td>
+          <td>{{ array_get($data, 'awayGoals') }} </td>
+              <td>{{ round(array_get($data, 'awayGoals')/array_get($data, 'goals')*100, 2, PHP_ROUND_HALF_UP) }} %</td>
         </tr>
       </table>
     </div>

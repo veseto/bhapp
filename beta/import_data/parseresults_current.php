@@ -37,7 +37,7 @@
 		if(get_http_response_code($url) != "200"){
 		    return;
 		}
-		$mysqli->query("INSERT INTO importedSeasons (league_details_id, season) values ($leagueId, '$season')");
+		// $mysqli->query("INSERT INTO importedSeasons (league_details_id, season) values ($leagueId, '$season')");
 		$data = file_get_contents($url);
 
 		//echo "$url<br>";

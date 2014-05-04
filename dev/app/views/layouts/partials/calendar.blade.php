@@ -1,5 +1,5 @@
-<div class="col-xs-3" style="padding-top:7px;text-align:right;">
-	<span><a href="#" class="btn-sm btn-default"><</a></span>&nbsp;<span><a href="#" class="btn-sm btn-default">today</a>&nbsp;<a href="#" class="btn-sm btn-default">></a>
+<div class="col-xs-3" style="padding-top:1px;text-align:right;">
+	<span><a href="#" class="btn btn-default"><</a></span>&nbsp;<span><a href="#" class="btn btn-default">today</a>&nbsp;<a href="#" class="btn btn-default">></a>
 </div>
 <div class="col-xs-3 noPadding">
   <!-- calendar -->

@@ -62,6 +62,24 @@ body {
   margin: 0px !important;
   padding: 0px !important;
 }
+.statsBrowser {
+  
+}
+.statsBrowser .list-group {
+  height: 220px;
+  overflow: scroll;
+}
+.statsBrowser .list-group .list-group-item {
+  border: 1px solid #eee;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.statsBrowser .list-group .header {
+  padding: 3px;
+  margin: 0px;
+  text-align: center;
+  border-bottom: none;
+}
 .noMargin {
   margin:0px !important;
 }

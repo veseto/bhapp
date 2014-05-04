@@ -11,39 +11,25 @@
 @stop
 
 @section('pageHeader')
-	@include('layouts.partials.pageheader', array('calendar' => true, 'big' => "Statistics", 'small' => ''))
+	@include('layouts.partials.pageheader', array('calendar' => true, 'big' => "Statistics"))
 @stop
 
 @section('content')
 	<div class="row">
-		<div class="col-xs-3 text-center">
-			Country		
-		</div>
-		<div class="col-xs-3 text-center">
-			League		
-		</div>
-		<div class="col-xs-3 text-center">
-			Year		
-		</div>
-		<div class="col-xs-3">
-					
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-xs-3">
-			<div class="list-group" style="height:200px;overflow:scroll;">
+		<div class="col-xs-3 statsBrowser">
+			<div class="list-group">
+		       <a class="list-group-item header" style="">Country (??)</a>
 			@foreach($data as $country => $leagues)
 		       <a class="list-group-item country" style="">{{$country}}</a>
 		    @endforeach
-		    
 			</div>
 		</div>
-		<div class="col-xs-3">
-			<div class="list-group leagues-container" style="height:200px;overflow:scroll;">
+		<div class="col-xs-3 statsBrowser">
+			<div class="list-group leagues-container">
 			</div>
 		</div>
-		<div class="col-xs-3">
-			<div class="list-group years-container" style="height:200px;overflow:scroll;">
+		<div class="col-xs-3 statsBrowser">
+			<div class="list-group years-container">
 			
 			</div>
 		</div>
@@ -53,7 +39,7 @@
 				<input type="hidden" id='hidden_league'>
 				<input type="hidden" id='hidden_year'>
 			</form>
-			<a href="" id="hidden">GO</a>
+			<a href="" class="btn btx-xs btn-primary" id="hidden">GO</a>
 		</div>
 	</div>
 	   
