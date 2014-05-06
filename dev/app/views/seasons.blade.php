@@ -12,15 +12,11 @@
 @stop
 
 @section('pageHeader')
-	@include('layouts.partials.header', array('calendar' => true, 'big' => array_get($data, 'country'), 'small' => array_get($data, 'league')))
+	@include('layouts.partials.pageheader', array('calendar' => true, 'big' => array_get($data, 'country'), 'small' => array_get($data, 'league')))
 @stop
 
 @section('content')
         @foreach(array_get($data, 'seasons') as $season)
     	<a href="{{$season->season}}/stats">{{ $season->season }}</a><br>
  	@endforeach
-@stop
-
-@section('footer')
-	   
 @stop

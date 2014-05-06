@@ -2,11 +2,52 @@
 
 class SeriesController extends BaseController {
 
+	public function calculatePPMSeries() {
+		$leagues = LeagueDetails::whereIn('id', array(1, 17, 35, 39, 6, 100, 69))->get();
 
+		foreach ($leagues as $league) {
+			$matches = Match::where('league_details_id', '=', $league->id)->orderBy('matchDate')->orderBy('matchTime')->get();
+			foreach ($matches as $match) {
+				for($i = 5; $i < 9; $i ++) {
+					$series = Series::where('team', '=', $league->country)->where('active', '=', 1)->where('game_type_id', '=', $i)->first();
+					if ($series == NULL) {
+						$series = new Series;
+						$series->team = $league->country;
+						$series->game_type_id = $i;
+						$series->current_length = 0;
+						$series->start_match_id = $match->id;
+						$series->active = 1;
+						$series->save();
+					}
+					$series->current_length = $series->current_length + 1;
+					$series->end_match_id = $match->id;
+					$series->league_details_id = $match->league_details_id;
+					if ($this->endSeries($match, $i)) {
+						$series->active = 0;
+						$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
+						->where('end_match_id', '=', $series->end_match_id)
+						->where('team', '=', $league->country)
+						->where('current_length', '=', $series->current_length)
+						->where('game_type_id', '=', $series->game_type_id)->first();
+						if ($duplicate) {
+							$duplicate->delete();
+						}
+					}
+					$series->save();
+				}
+				if ($match->resultShort == '-' || $match->resultShort == '')
+					break 1;
+			}
+		}
+		return "finished";
 
-	public function calculatePPSSeries() {
+	}
+
+	public function calculatePPSSeries($country) {
 		$start = time();
-		$teams = Match::whereIn('league_details_id', array(7, 8, 9, 10))->distinct('home')->get(array('home'));
+		$ids = LeagueDetails::where('country', '=', $country)->lists('id');
+		// $ids = array(20, 21);
+		$teams = Match::whereIn('league_details_id', $ids)->distinct('home')->get(array('home'));
 		
 		foreach ($teams as $team) {
 			
@@ -14,12 +55,12 @@ class SeriesController extends BaseController {
 			
 		    // $ids = \DB::table('series')->lists('end_match_id');
 
-			$matches = Match::where(function($query) use ($regexp)
+			$matches = Match::whereIn('league_details_id', $ids)
+				->where(function($query) use ($regexp)
 	            {
 	                $query->where('home', '=', $regexp)
 	                      ->orWhere('away', '=', $regexp);
 	            })
-				// ->whereNotIn('id', $ids)
 				->orderBy('matchDate', 'asc')->orderBy('matchTime', 'asc')->get();
 			$prev_season = '2003-2004';
 			$prev_league = '-1';
@@ -39,7 +80,8 @@ class SeriesController extends BaseController {
 
 					$series->current_length = $series->current_length + 1;
 					$series->end_match_id = $match->id;
-
+					$series->league_details_id = $match->league_details_id;
+					
 					if ($this->endSeries($match, $i)) {
 						$series->active = 0;
 						$duplicate = Series::where('start_match_id', '=', $series->start_match_id)

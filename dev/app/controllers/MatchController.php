@@ -11,25 +11,32 @@ class MatchController extends BaseController {
 
 	public function getStats($country, $leagueName, $season) {
 		
-		$leagueId = LeagueDetails::getId($country, $leagueName);
+		$league = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $leagueName)->first();
 		
-		$distResults = $this->getUniqueResults($leagueId, $season);
+		$distResults = $this->getUniqueResults($league->id, $season);
 
-		$allCount = Match::matchesForSeason($leagueId, $season)->count();
-		$drawCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'D')->count();
-		$homeCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'H')->count();
-		$awayCount = Match::matchesForSeason($leagueId, $season)->where('resultShort', '=', 'A')->count();
+		$allCount = Match::matchesForSeason($league->id, $season)->count();
+		$drawCount = Match::matchesForSeason($league->id, $season)->where('resultShort', '=', 'D')->count();
+		$homeCount = Match::matchesForSeason($league->id, $season)->where('resultShort', '=', 'H')->count();
+		$awayCount = Match::matchesForSeason($league->id, $season)->where('resultShort', '=', 'A')->count();
 		$seq = $this->getSequences($country, $leagueName, $season);
-		$sSeq = Match::matchesForSeason($leagueId, $season)->get(array('resultShort', 'home', 'away', 'matchDate', 'matchTime', 'homeGoals', 'awayGoals'));
-		$pps1x2 = SeriesController::getSeriesForMatches($leagueId, $season, 1);
-		$pps00 = SeriesController::getSeriesForMatches($leagueId, $season, 2);
-		$pps11 = SeriesController::getSeriesForMatches($leagueId, $season, 3);
-		$pps22 = SeriesController::getSeriesForMatches($leagueId, $season, 4);
-		$homeGoals = Match::matchesForSeason($leagueId, $season)->sum('homeGoals');
-		$awayGoals = Match::matchesForSeason($leagueId, $season)->sum('awayGoals');
+		$sSeq = Match::matchesForSeason($league->id, $season)->get(array('resultShort', 'home', 'away', 'matchDate', 'matchTime', 'homeGoals', 'awayGoals'));
+		$pps1x2 = SeriesController::getSeriesForMatches($league->id, $season, 1);
+		$pps00 = SeriesController::getSeriesForMatches($league->id, $season, 2);
+		$pps11 = SeriesController::getSeriesForMatches($league->id, $season, 3);
+		$pps22 = SeriesController::getSeriesForMatches($league->id, $season, 4);
+		$homeGoals = Match::matchesForSeason($league->id, $season)->sum('homeGoals');
+		$awayGoals = Match::matchesForSeason($league->id, $season)->sum('awayGoals');
 		$goals = $homeGoals + $awayGoals;
+		$over = '??';//Match::matchesForSeason($leagueId, $season)->where('homeGoals + awayGoals', '>', 2.5)->count();
+		$under = '??';//Match::matchesForSeason($leagueId, $season)->where('homeGoals + awayGoals', '<', 2.5)->count();
+		
+		$count = Match::where('league_details_id', '=', $league->id)->where('season', '=', $season)->groupBy('home')->count();
+		$count = $count * 2;
 
-		$array = array('league' => $leagueName, 
+		$array = array('count' => $count,
+						'league' => $leagueName, 
+						'ppm' => $league->ppm, 
 						'country' => $country,
 						'season' => $season,
 						'all' => $allCount, 
@@ -45,7 +52,9 @@ class MatchController extends BaseController {
 						'pps22' => $pps22,
 						'goals' => $goals,
 						'homeGoals' => $homeGoals,
-						'awayGoals' => $awayGoals);
+						'awayGoals' => $awayGoals,
+						'over' => $over,
+						'under' => $under);
 
 		//->nest('seq',  'sequences', array('sequences' => $seq)
 		return View::make('stats')->with('data', $array);
@@ -95,40 +104,38 @@ class MatchController extends BaseController {
                  ->get();
 	}
 
-	public function getTodaysMatches(){
+	public function getTodaysMatches($from, $to){
 		// $d = date("Y-m-d", time());
 		// $matches = Match::where('id', '=', '000cQmf2')->get();
 
-		return View::make('matches');
+		return View::make('home')->with(array('from' => $from, 'to' => $to));
 	}
 
+	 public function getDatatable($from, $to) {
+        // $matches = Match::where('matchDate', '>=', $from)->where('matchDate', '<=', $to)->get();
 
-		public function getTodaysMatches2(){
-		// $d = date("Y-m-d", time());
-		// $matches = Match::where('id', '=', '000cQmf2')->get();
+	 	$settings = Settings::where('user_id', '=', Auth::user()->id)->get();
+	 	$ids = array();
+	 	foreach ($settings as $setting) {
+	 		//->
+	 		$ids = Series::where('active', '=', 1)
+				->where('game_type_id', '=', $setting->game_type_id)
+				->where('league_details_id', '=', $setting->league_details_id)
+				->where('current_length', '>', $setting->min_start)
+	 			->lists('end_match_id');
+	 	}
 
-		return View::make('matches2');
-	}
-
-
-	 public function getDatatable()
-    {
-    	$date = date('Y-m-d', time());
-        return Datatable::collection(Match::where('league_details_id', '=', '1')->orderBy('matchTime')->get(array('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')))
-        ->showColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
-        ->searchColumns('home', 'away')
-        ->orderColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
-        ->make();
-    }
-
-    public function getDatatable2()
-    {
-    	$date = date('Y-m-d', time());
-    	$col = Match::where('league_details_id', '=', '1')->orderBy('matchTime')->get(array('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals'));
-        return Datatable::collection($col)
-        ->showColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
-        ->searchColumns('home', 'away')
-        ->orderColumns('matchDate', 'matchTime', 'home', 'away', 'homeGoals', 'awayGoals')
-        ->make();
+        $query = DB::table('match')
+	        ->join('series', 'series.end_match_id', '=', 'match.id')
+	        ->join('game_type', 'series.game_type_id', '=', 'game_type.id')
+	        ->whereIn('match.id', $ids)
+	        ->where('matchDate', '>=', $from)
+	        ->where('matchDate', '<=', $to)
+	        ->select(array('match.id as id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type'));
+        return Datatable::query($query)
+	        ->showColumns('id','matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
+	        ->searchColumns('id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
+	        ->orderColumns('id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
+	        ->make();
     }
 }

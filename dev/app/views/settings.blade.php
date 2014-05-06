@@ -25,18 +25,22 @@
 <div id='content' class="tab-content">
 	<!-- tab::myleagues -->
 	<div class="tab-pane active" id="myppsleagues">
-		<div class="row">
-			<div class="col-xs-6 noPadding">
+		<?php $i = 0; ?>
+			@foreach($settings as $country=>$leagues)
+				@if($i % 2 == 0)
+					<div class="row">
+				@endif
+				<div class="col-xs-6 noPadding">
 				<div class="panel-group" id="accordion">
-					<div class="panel panel-primary">
+					<div class="panel panel-default">
 					    <div class="panel-heading">
 				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFrance">
-				          France
+				        <a data-toggle="collapse" data-parent="#accordion" href="#{{ $country }}">
+				          {{ $country }}
 				        </a>
 				      </h4>
 					    </div>
-					    <div id="collapseFrance" class="panel-collapse collapse in">
+					    <div id="{{ $country }}" class="panel-collapse collapse">
 				      <div class="panel-body">
 						<table class="table">
 							<tr>
@@ -56,455 +60,34 @@
 							  	2:2 / Length
 							  </td>
 							</tr>
-							<tr>
+							  @foreach($leagues as $name=>$s)
+							<tr id="{{$s[0]}}">
 							  <td>
-							  	Premiership
+							  	{{ $name }}
 							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
+							  @for($j = 1; $j < 5; $j ++)
+								  <td id="{{$j}}">
+								  		@if($s[$j] != NULL && $s[$j]->ignore != 1)
+					  			  	      	<input class="ch" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $s[$j]->min_start }}">
+					  			  	    @else 
+					  			  	      	<input class="ch" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
+					  			  	    @endif
+								  </td>
+							  @endfor
 							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
+							
+							@endforeach
 						</table>						
 				      </div>
 					    </div>
 			    	</div>
 		    	</div>
 			</div>
-			<div class="col-xs-6 noPadding">
-				<div class="panel-group" id="accordion">
-					<div class="panel panel-default">
-					    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseEngland">
-				          England
-				        </a>
-				      </h4>
-					    </div>
-					    <div id="collapseEngland" class="panel-collapse collapse in">
-				      <div class="panel-body">
-						<table class="table">
-							<tr>
-							  <td>
-							  	League
-							  </td>
-							  <td>
-							  	PPS / Length
-							  </td>
-							  <td>
-								PPM
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Premiership
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-						</table>						
-				      </div>
-					    </div>
-			    	</div>
-		    	</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-6 noPadding">
-				<div class="panel-group" id="accordion">
-					<div class="panel panel-default">
-					    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseGermany">
-				          Germany
-				        </a>
-				      </h4>
-					    </div>
-					    <div id="collapseGermany" class="panel-collapse collapse">
-				      <div class="panel-body">
-						<table class="table">
-							<tr>
-							  <td>
-							  	League
-							  </td>
-							  <td>
-							  	PPS / Length
-							  </td>
-							  <td>
-								PPM
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Premiership
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-						</table>						
-				      </div>
-					    </div>
-			    	</div>
-		    	</div>
-			</div>
-			<div class="col-xs-6 noPadding">
-				<div class="panel-group" id="accordion">
-					<div class="panel panel-default">
-					    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseItaly">
-				          Italy
-				        </a>
-				      </h4>
-					    </div>
-					    <div id="collapseItaly" class="panel-collapse collapse">
-				      <div class="panel-body">
-						<table class="table">
-							<tr>
-							  <td>
-							  	League
-							  </td>
-							  <td>
-							  	PPS / Length
-							  </td>
-							  <td>
-								PPM
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Premiership
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-						</table>						
-				      </div>
-					    </div>
-			    	</div>
-		    	</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-6 noPadding">
-				<div class="panel-group" id="accordion">
-					<div class="panel panel-default">
-					    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapsePoland">
-				          Poland
-				        </a>
-				      </h4>
-					    </div>
-					    <div id="collapsePoland" class="panel-collapse collapse">
-				      <div class="panel-body">
-						<table class="table">
-							<tr>
-							  <td>
-							  	League
-							  </td>
-							  <td>
-							  	PPS / Length
-							  </td>
-							  <td>
-								PPM
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Premiership
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-						</table>						
-				      </div>
-					    </div>
-			    	</div>
-		    	</div>
-			</div>
-			<div class="col-xs-6 noPadding">
-				<div class="panel-group" id="accordion">
-					<div class="panel panel-default">
-					    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSpain">
-				          Spain
-				        </a>
-				      </h4>
-					    </div>
-					    <div id="collapseSpain" class="panel-collapse collapse">
-				      <div class="panel-body">
-						<table class="table">
-							<tr>
-							  <td>
-							  	League
-							  </td>
-							  <td>
-							  	PPS / Length
-							  </td>
-							  <td>
-								PPM
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Premiership
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Championship
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League 1
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	League2
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox">
-							  </td>
-							</tr>
-						</table>						
-				      </div>
-					    </div>
-			    	</div>
-		    	</div>
-			</div>
-		</div>
+			@if($i % 2 == 1)
+					</div>
+			@endif
+			<?php $i ++; ?>
+			@endforeach
 	</div>
 	<!-- tab::myppmleagues -->
 	<div class="tab-pane" id="myppmleagues">
@@ -731,6 +314,40 @@
 </div>
 <!-- js for tabs -->
 <script type="text/javascript">
+	$(".ch").change(function(){
+		if (this.checked) {
+			// alert("boo");
+			$(this).siblings("input").removeAttr("disabled");
+			// var url = "/settings/"+$(this).parent().parent().attr("id")+"/"+$(this).parent().attr("id")+"/"+$(this).siblings("input").val()+"/enable";
+			// alert(url);
+			$.post("/settings/enable",
+	            {
+	                "league": $(this).parent().parent().attr("id"),
+	                "game": $(this).parent().attr("id"),
+	                "min": $(this).siblings("input").val()
+	            },
+	            function( data ) {
+	                //do something with data/response returned by server
+	            },
+	            'json'
+	        );
+		} else {
+			$.post("/settings/disable",
+	            {
+	                // "_token": $( this ).find( 'input[name=_token]' ).val(),
+	                "league": $(this).parent().parent().attr("id"),
+	                "game": $(this).parent().attr("id"),
+	            },
+	            function( data ) {
+	                //do something with data/response returned by server
+	            },
+	            'json'
+	        );
+		};               
+	});
+	$(".min_start").focusout(function(){
+		// alert($(this).val());
+	})
   $('#myTab a').click(function (e) {
   e.preventDefault()
   $(this).tab('show')

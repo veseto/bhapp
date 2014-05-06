@@ -4,7 +4,7 @@ class LeagueDetailsController extends BaseController {
 
 	public function getImportedSeasons($country, $league) {
 		
-		$seasons = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $league)->first()->importedSeasons;
+		$seasons = LeagueDetails::distinct()->where('country', '=', $country)->where('fullName', '=', $league)->first()->importedSeasons;
 		$data = array('seasons' => $seasons, 
 						'country' => $country, 
 						'league' => $league);
@@ -20,14 +20,14 @@ class LeagueDetailsController extends BaseController {
 	}
 
 	public function getCountriesPlusLeagues() {
-		$countries = LeagueDetails::distinct()->get(array('country'));
+		$countries = LeagueDetails::distinct()->orderBy('country')->get(array('country'));
 
 		$data = array();
 		foreach ($countries as $country) {
 			$leagues = LeagueDetails::where('country', '=', $country->country)->get(array('fullName', 'id'));
 			$names = array();
 			foreach ($leagues as $league) {
-				$seasons = ImportedSeasons::where('league_details_id', '=', $league->id)->orderBy('season', 'DESC')->get();
+				$seasons = ImportedSeasons::distinct()->where('league_details_id', '=', $league->id)->orderBy('season', 'DESC')->get();
 				$s = array();
 				foreach ($seasons as $season) {
 					array_push($s, $season->season);

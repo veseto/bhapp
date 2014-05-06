@@ -1,11 +1,15 @@
 <?php
 	// include("includes/connection.php");
-	include("parsematchdetails.php");
+	// include("parsematchdetails.php");
 	// $league = $mysqli->query("SELECT * FROM leagueDetails")->fetch_assoc();
 	
 	// $baseUrl = "http://www.betexplorer.com/soccer/poland/ekstraklasa-2010-2011/";
 			//$url = "http://www.xscores.com/soccer/Results.jsp?sport=1&countryName=USA&leagueName=ALL+STAR+GAME&seasonName=$season&sortBy=R&round=$n&result=3#.UvjQ30KSztk";
 
+	function get_http_response_code($url) {
+	    $headers = get_headers($url);
+	    return substr($headers[0], 9, 3);
+	}
 	function parseResults($baseUrl, $alternativeUrl, $alternativeUrl2, $alternativeUrl3, $alternativeUrl4, $season, $leagueId) {
 		include("../includes/connection.php");
 		$workingBaseUrl = $baseUrl;
@@ -34,7 +38,8 @@
 		if(get_http_response_code($url) != "200"){
 		    return;
 		}
-		$mysqli->query("INSERT INTO importedSeasons (leagueId, season) values ($leagueId, '$season')");
+		// $mysqli->query("INSERT INTO importedSeasons (league_details_id, season) values ($leagueId, '$season')");
+		
 		$data = file_get_contents($url);
 
 		//echo "$url<br>";
@@ -104,11 +109,11 @@
 					    //echo $cols->item(6)->nodeValue;
 					   // echo parseMatchDetails($workingBaseUrl, $matchId, $season, $round, $leagueId);
 				    	
-				    	$q0 = "INSERT INTO bhapp.match (matchId, season, round, leagueId, stage) values ('$matchId', '$season', '$round', $leagueId, '$stageName')";
-				    	// echo "$q0<br>";
+				    	$q0 = "INSERT INTO bhapp.match (id, season, round, league_details_id, stage) values ('$matchId', '$season', '$round', $leagueId, '$stageName')";
+				    	echo "$q0<br>";
 				    	$mysqli->query($q0);
 				    	
-				    	echo $mysqli->error;
+				    	echo $mysqli->error."<br>";
 					}
 
 				    // echo "<br>";
@@ -157,7 +162,7 @@
 				    //echo $cols->item(6)->nodeValue;
 				   // echo parseMatchDetails($workingBaseUrl, $matchId, $season, $round, $leagueId);
 			    	
-			    	$q0 = "INSERT INTO bhapp.match (matchId, season, round, leagueId, stage) values ('$matchId', '$season', '$round', $leagueId, 'main')";
+			    	$q0 = "INSERT INTO bhapp.match (id, season, round, league_details_id, stage) values ('$matchId', '$season', '$round', $leagueId, 'main')";
 			    	echo "$q0<br>";
 			    	$mysqli->query($q0);
 			    	

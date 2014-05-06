@@ -3,8 +3,10 @@
 <a href="#" type="button" data-toggle="tooltip" data-placement="top" title="<strong>{{array_get($data, 'match')->homeGoals}}:{{array_get($data, 'match')->awayGoals}}</strong>&nbsp;({{array_get($data, 'match')->home}}&nbsp;-&nbsp;{{array_get($data, 'match')->away}})<br/>{{ date("d.m.Y",strtotime(array_get($data, 'match')->matchDate)) }}" class="btn hasTooltip 
     @if(array_get($data, 'match')->resultShort == 'H' || array_get($data, 'match')->resultShort == 'A')
         {{"btn-success"}} 
-    @else 
+    @elseif(array_get($data, 'match')->resultShort == 'D') 
         {{"btn-warning"}}
+    @elseif(array_get($data, 'match')->resultShort == '-' || array_get($data, 'match')->state == 'Canceled')
+        {{"btn-info"}}
     @endif
     btn-xs w25">{{array_get($data, 'match')->resultShort}}</a>
 @else
