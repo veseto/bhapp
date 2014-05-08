@@ -25,6 +25,9 @@
 				<th><input type="text" name="search_engine" class="search_init" placeholder="res"></th>
 				<th><input type="hidden"></th>
 				<th><input type="text" name="search_engine" class="search_init" placeholder="game"></th>
+				<th><input type="hidden"></th>
+				<th><input type="hidden"></th>
+				<th><input type="hidden"></th>
 			</tr>
 			<tr>
 				<th>date</th>
@@ -34,24 +37,56 @@
 				<th>result</th>
 				<th>length</th>
 				<th>game</th>
+				<th>bsf</th>
+				<th>bet</th>
+				<th>odds</th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach($data as $d)
-				<tr>
+				<tr class="{{$d->match_id}}">
 					<td>{{$d->matchDate}}</td>
 					<td>{{$d->matchTime}}</td>
 					<td>{{$d->home}}</td>
-					<td class="editable text-danger">{{$d->away}}</td>
+					<td>{{$d->away}}</td>
 					<td>{{$d->resultShort}}</td>
 					<td>{{$d->current_length}}</td>
 					<td>{{$d->type}}</td>
+					<td class="editable">{{$d->bsf}}</td>
+					<td class="editable">{{$d->bet}}</td>
+					<td class="editable">{{$d->odds}}</td>
 
 				</tr>
 			@endforeach
 		</tbody>
 	</table>
 	<script type="text/javascript">
+	
+	$( "tbody>tr" ).hover(
+		function() {
+			var claz = $(this).attr('class');
+			var st = claz.split(' ');
+			var firstClass = st[0];
+
+			var id="."+firstClass;
+			//alert(id);
+			if ($(id).length > 1) {
+				$(id+">td").addClass("text-danger");
+			}
+			//$(id).attr("style", "color: red");
+			//$( this ).append( $( "<span> ***</span>" ) );
+		}, function() {
+			var claz = $(this).attr('class');
+			var st = claz.split(' ');
+			var firstClass = st[0];
+
+			var id="."+firstClass;
+			//alert(id);
+			$(id+">td").removeClass("text-danger");
+			//$(id).addClass("test");			
+		}
+	);
+
 	var asInitVals = new Array();
 
 	$(document).ready(function(){
@@ -110,7 +145,9 @@
 	                "row_id": this.parentNode.getAttribute('id'),
 	                "column": oTable.fnGetPosition( this )[2]
 	            };
-	        }
+	        },
+	        "height": "25px",
+	        "width": "40px"
 	    } );
 	});
 	</script>

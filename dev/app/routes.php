@@ -36,10 +36,9 @@ Route::post('/settings/disable', "SettingsController@deleteIgnore");
 // 	$data['match'] = $m;
 // 	return View::make('hello')->with('data', $data);
 // })-> before('auth');
+Route::get('/matches/{from?}/{to?}', array('as' => 'matches', 'uses' => 'MatchController@getMatches'))-> before('auth');
 
-Route::get('/home/{from}/{to}', array('as' => 'matches', 'uses' => 'MatchController@getTodaysMatches'))-> before('auth');
-
-Route::get('api/matches/{from}/{to}', 'MatchController@getDatatable')-> before('auth');
+Route::get('/home/{from?}/{to?}', array('as' => 'home', 'uses' => 'MatchController@getMatches'))-> before('auth');
 
 Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'))-> before('auth');
 

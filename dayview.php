@@ -107,7 +107,7 @@ if(!isset($_SESSION['uid'])) {
 	                echo $row['awayTeam'];
 	              }
 	          ?></td>
-	          <td class="editable warning" id="<?php echo $row['seriesId'];?>"><?php echo $row["betSoFar"];?></td>
+	          <td id="<?php echo $row['seriesId'];?>"><?php echo $row["betSoFar"];?></td>
 	          <td <?php if ($row['resultShort'] == '-') echo 'class="editable warning"';?> id="<?php echo $row['seriesId'];?>"><?php echo $row['bet']; ?></td>
 	          <td <?php if ($row['resultShort'] == '-') echo 'class="editable warning"';?> id="<?php echo $row['seriesId'];?>"><?php echo $row['odds']; ?></td>
 	          <td><?php echo $row['income']; ?></span></td>

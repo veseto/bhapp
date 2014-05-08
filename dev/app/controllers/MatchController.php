@@ -104,38 +104,60 @@ class MatchController extends BaseController {
                  ->get();
 	}
 
-	public function getTodaysMatches($from, $to){
-		// $d = date("Y-m-d", time());
-		// $matches = Match::where('id', '=', '000cQmf2')->get();
+	public function getTodaysMatches($from = '2014-05-05', $to = '2014-05-05'){
 
-		return View::make('home')->with(array('from' => $from, 'to' => $to));
+	 	// $settings = Settings::where('user_id', '=', Auth::user()->id)->get();
+	 	// $ids = array();
+	 	// foreach ($settings as $setting) {
+	 	// 	//->
+	 	// 	$ids = Series::where('active', '=', 1)
+			// 	->where('game_type_id', '=', $setting->game_type_id)
+			// 	->where('league_details_id', '=', $setting->league_details_id)
+			// 	->where('current_length', '>', $setting->min_start)
+	 	// 		->lists('end_match_id');
+	 	// }
+
+        // $res = Match::join('series', 'series.end_match_id', '=', 'match.id')
+	        // ->join('game_type', 'series.game_type_id', '=', 'game_type.id')
+	        // ->whereIn('match.id', $ids)
+	        // ->where('matchDate', '>=', $from)
+	        // ->where('matchDate', '<=', $to)
+	        // ->get();
+
+	 	$res = Match::whereIn('league_details_id', array(7))->where('matchDate', '>', '2014-04-05')->get();
+		return View::make('home')->with(array('data' => $res));
 	}
 
-	 public function getDatatable($from, $to) {
-        // $matches = Match::where('matchDate', '>=', $from)->where('matchDate', '<=', $to)->get();
+	public function getMatches($from = "", $to = "") {
 
-	 	$settings = Settings::where('user_id', '=', Auth::user()->id)->get();
-	 	$ids = array();
-	 	foreach ($settings as $setting) {
-	 		//->
-	 		$ids = Series::where('active', '=', 1)
-				->where('game_type_id', '=', $setting->game_type_id)
-				->where('league_details_id', '=', $setting->league_details_id)
-				->where('current_length', '>', $setting->min_start)
-	 			->lists('end_match_id');
-	 	}
+		// if ($from == "-"){
+		// 	$date = new DateTime();
+		// 	$from = $date->format('Y-m-d');
+		// 	$to = $from;
+		// }
 
-        $query = DB::table('match')
-	        ->join('series', 'series.end_match_id', '=', 'match.id')
-	        ->join('game_type', 'series.game_type_id', '=', 'game_type.id')
-	        ->whereIn('match.id', $ids)
-	        ->where('matchDate', '>=', $from)
-	        ->where('matchDate', '<=', $to)
-	        ->select(array('match.id as id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type'));
-        return Datatable::query($query)
-	        ->showColumns('id','matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
-	        ->searchColumns('id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
-	        ->orderColumns('id', 'matchDate', 'matchTime', 'home', 'away', 'resultShort', 'current_length', 'type')
-	        ->make();
-    }
+		// $settings = Settings::where('user_id', '=', Auth::user()->id)->where('ignore', '=', 0)->get();
+		// //$tmp = $ids;
+	 // 	$ids = array();
+	 // 	foreach ($settings as $setting) {
+	 // 		//->
+	 // 		$ids = array_merge($ids, DB::table('series')->where('active', '=', 1)
+		// 		->where('game_type_id', '=', $setting->game_type_id)
+		// 		->where('league_details_id', '=', $setting->league_details_id)
+		// 		->where('current_length', '>', $setting->min_start)//->get();
+	 // 			->lists('end_match_id'));
+	 // 	}
+
+        $res = Match::join('played', 'played.match_id', '=', 'match.id')
+        	->join('game_type', 'game_type.id', '=', 'played.game_type_id')
+	        //->join('game_type', 'series.game_type_id', '=', 'game_type.id')
+	        //->whereIn('match.id', $ids)
+	        ->where('user_id', '=', Auth::user()->id)
+	       // ->where('matchDate', '>=', $from)
+	        //->where('matchDate', '<=', $to)
+	        ->get(); 
+
+		return View::make('matches')->with(array('data' => $res));
+	}
+
 }

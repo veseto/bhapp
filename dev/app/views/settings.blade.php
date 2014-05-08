@@ -26,7 +26,7 @@
 	<!-- tab::myleagues -->
 	<div class="tab-pane active" id="myppsleagues">
 		<?php $i = 0; ?>
-			@foreach($settings as $country=>$leagues)
+			@foreach($pps as $country=>$leagues)
 				@if($i % 2 == 0)
 					<div class="row">
 				@endif
@@ -68,9 +68,9 @@
 							  @for($j = 1; $j < 5; $j ++)
 								  <td id="{{$j}}">
 								  		@if($s[$j] != NULL && $s[$j]->ignore != 1)
-					  			  	      	<input class="ch" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $s[$j]->min_start }}">
+					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $s[$j]->min_start }}">
 					  			  	    @else 
-					  			  	      	<input class="ch" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
+					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
 					  			  	    @endif
 								  </td>
 							  @endfor
@@ -122,125 +122,26 @@
 							  	2:2 / Length
 							  </td>
 							</tr>
-							<tr>
+							
+							@foreach($ppm as $country=>$settings)
+
+							<tr id="{{ $settings[0] }}">
 							  <td>
-							  	Poland
+							  	{{ $country }}
 							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
+							  @for($j = 5; $j < 9; $j ++)
+								  <td id="{{$j}}">
+								  		@if($settings[$j] != NULL && $settings[$j]->ignore != 1)
+					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $settings[$j]->min_start }}">
+					  			  	    @else 
+					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
+					  			  	    @endif
+								  </td>
+							  @endfor
 							</tr>
-							<tr>
-							  <td>
-							  	Australia
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Lithuania
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Spain
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Croatia
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Denmark
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
-							<tr>
-							  <td>
-							  	Russia
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							  <td>
-			  			  	      <input type="checkbox"> at <input type="text" style="height: 20px;width: 25px;"> 
-							  </td>
-							</tr>
+
+							@endforeach
+
 						</table>						
 				      </div>
 					    </div>
@@ -314,10 +215,10 @@
 </div>
 <!-- js for tabs -->
 <script type="text/javascript">
-	$(".ch").change(function(){
+	$(".activate_league_for_play").change(function(){
 		if (this.checked) {
 			// alert("boo");
-			$(this).siblings("input").removeAttr("disabled");
+			// $(this).siblings("input").prop("disabled", false);
 			// var url = "/settings/"+$(this).parent().parent().attr("id")+"/"+$(this).parent().attr("id")+"/"+$(this).siblings("input").val()+"/enable";
 			// alert(url);
 			$.post("/settings/enable",
@@ -343,10 +244,21 @@
 	            },
 	            'json'
 	        );
-		};               
+		};
+		// $(this).siblings("input").prop("disabled", true);               
 	});
 	$(".min_start").focusout(function(){
-		// alert($(this).val());
+		$.post("/settings/enable",
+	            {
+	                "league": $(this).parent().parent().attr("id"),
+	                "game": $(this).parent().attr("id"),
+	                "min": $(this).val()
+	            },
+	            function( data ) {
+	                //do something with data/response returned by server
+	            },
+	            'json'
+	        );
 	})
   $('#myTab a').click(function (e) {
   e.preventDefault()

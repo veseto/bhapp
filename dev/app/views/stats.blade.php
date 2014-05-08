@@ -69,12 +69,15 @@
     </div>
 <!-- table 1x2 -->
     <div class="tab-pane active" id="1x2">
-      <table class="table table-bordered">
+      <table id="dt" class="table table-bordered">
+        <thead>
         <tr>
             <th>League progress</th>
             <th width="25%"># of matches</th>
             <th width="25%">%</th>
         </tr>
+        </thead>
+        <tbody>
         <tr>
           <td>Matches total</td>
           <td>{{ array_get($data, 'all') }}</td>
@@ -95,6 +98,7 @@
           <td>{{ array_get($data, 'away') }}</td>
           <td>{{ round(array_get($data, 'away')/array_get($data, 'all')*100, 2, PHP_ROUND_HALF_UP) }} %</td>
         </tr>
+        </tbody>
       </table>
   </div>
 
