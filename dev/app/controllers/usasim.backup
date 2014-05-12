@@ -1,0 +1,247 @@
+public function startSimusa() {
+				$seasons = array("2012", "2013", "2013-2014");
+
+		$teams = Match::distinct('home')->where('league_details_id', '=', 112)->whereIn('season', $seasons)->lists('home');
+
+
+		foreach ($teams as $team) {
+			$count = 0;
+			foreach ($seasons as $season) {
+
+				$matches = Match::where(function($query) use ($team)
+		        {
+		            $query->where('home', '=', $team)
+		                  ->orWhere('away', '=', $team);
+		        })
+		        ->join('odds1x2', 'match.id', '=', 'odds1x2.match_id')
+        		->where('bookmaker_id', '=', '1')
+        		->distinct('match_id')
+		        ->where('league_details_id', '=', 112)
+		        ->where('season', '=', $season)
+		        ->orderBy('matchDate')
+		        ->get();
+		        
+		        foreach ($matches as $match) {
+		        	$played = new PlayedSim;
+		        	$played->match_id = $match->id;
+		        	$played->current_length = $count;
+		        	$played->team = $team;
+		        	$played->odds = $match->oddsX;
+		        	$played->save();
+		        	if ($match->resultShort == 'D') {
+		        		$count = 0;
+		        	} else {
+		        		$count = $count + 1;
+		        	}
+				}
+		    }
+
+		}
+	}
+
+
+public function newSimusa() {
+		$count = Input::get('count');
+		// $count = 0;
+		$startdate = "2012-03-11";
+		$wn = date("W", strtotime($startdate));
+
+		$d = '2012W' . sprintf('%02d', $wn);
+		// $thursday = date('Y-n-j', strtotime($date_string));
+		
+		$enddate = date('Y-m-d', strtotime($d . '4'));
+
+		$matches = PlayedSim::where('current_length', '>=', $count)
+				->join('match', 'match.id', '=', 'played_sim.match_id')
+				->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+				->where('matchDate', '<=', $enddate)
+				->orderBy('matchDate')
+				->get();
+
+		while (count($matches) == 0) {
+			$startdate = $enddate;
+			$end = date('l', strtotime( $enddate)); 
+			if ($end == 'Thursday') {
+				$date = strtotime($startdate."+4 day");
+				$enddate = date('Y-m-d', $date);
+			} else if ($end == 'Monday') {
+				$date = strtotime($startdate."+3 day");
+				$enddate = date('Y-m-d', $date);
+			}
+			$matches = PlayedSim::where('current_length', '>=', $count)
+				->join('match', 'match.id', '=', 'played_sim.match_id')
+				->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+				->where('matchDate', '<=', $enddate)
+				->where('matchDate', '>', $startdate)
+				->orderBy('matchDate')
+				->get();			
+		}
+
+		DB::table('played_sim')->update(array('bet' => 0.00, 'bsf' => 0.00, 'income' => 0.00, 'profit' => 0));
+		// return Redirect::intended("/tmp/$round->season/$arg");
+		
+	     $bet = Input::get('init')/count($matches);
+
+	     foreach ($matches as $match) {
+	    	$played_sim = PlayedSim::where('id', '=', $match->id)->first();
+	    	// $played_sim->bsf = $bsfpm;
+	    	$played_sim->bet = $bet;
+	    	$played_sim->income = $played_sim->bet*$played_sim->odds;
+	    	$played_sim->profit = $played_sim->bet*$played_sim->odds - $played_sim->bet - $played_sim->bsf;
+	    	$played_sim->save();
+	    }
+
+		return View::make('usasim')->with(array('data' => $matches, 'season' => Input::get('season'), 'count' => $count, 'income' => 0, 'profit' => 0, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'startdate' => $startdate, 'enddate' => $enddate));
+
+	}
+
+	
+
+	public function nextusa() {
+		$count = Input::get('count');
+		$season = Input::get('season');
+		$startdate = Input::get('startdate');
+		$enddate = Input::get('enddate');
+		$income = Input::get('income');
+		$profit = Input::get('profit');
+		$mul = Input::get('multiply');
+
+		
+		// if ($season == '2012' && $round == 34) {
+		// 	$nextround = 1;
+		// 	$nextseason = '2012-2013';
+		// }
+		// if ($season == '2012-2013' && $round == 34) {
+		// 	$nextround = 1;
+		// 	$nextseason = '2013-2014';
+		// }
+
+		$res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+			->where('resultShort', '<>', 'D')
+			->where('matchDate', '<=', $enddate)
+			->where('matchDate', '>', $startdate)
+			->where('season', '=', $season)
+			->where('current_length', '>=', $count)
+	        ->orderBy('matchDate')
+	        ->orderBy('home');
+// ->sum('bet')->get();
+	    $bet = $res->sum('bet');
+	    $bsf = $res->sum('bsf') + $bet; 
+
+	    $startdate = $enddate;
+
+		$end = date('l', strtotime( $enddate)); 
+		if ($end == 'Thursday') {
+			$date = strtotime($startdate."+4 day");
+			$enddate = date('Y-m-d', $date);
+		} else if ($end == 'Monday') {
+			$date = strtotime($startdate."+3 day");
+			$enddate = date('Y-m-d', $date);
+		}
+
+		// return $startdate .' '. $enddate;
+		$nextseason = $season;
+
+		$res1 = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+			->where('matchDate', '<=', $enddate)
+			->where('matchDate', '>', $startdate)			
+			->where('season', '=', $season)
+			->where('current_length', '>=', $count)
+	        ->orderBy('matchDate')
+	        ->orderBy('home');
+	        // ->get(); 
+
+	    $count_matches = $res1->count();
+
+	    while($count_matches == 0) {
+	    	$startdate = $enddate;
+
+		$end = date('l', strtotime( $enddate)); 
+		if ($end == 'Thursday') {
+			$date = strtotime($startdate."+4 day");
+			$enddate = date('Y-m-d', $date);
+		} else if ($end == 'Monday') {
+			$date = strtotime($startdate."+3 day");
+			$enddate = date('Y-m-d', $date);
+		}
+
+		// return $startdate .' '. $enddate;
+		$nextseason = $season;
+
+		$res1 = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+			->where('matchDate', '<=', $enddate)
+			->where('matchDate', '>', $startdate)			
+			->where('season', '=', $season)
+			->where('current_length', '>=', $count)
+	        ->orderBy('matchDate')
+	        ->orderBy('home');
+	        // ->get(); 
+
+	    $count_matches = $res1->count();
+	    }
+
+	    $bsfpm = round($bsf/$count_matches, 2, PHP_ROUND_HALF_UP);
+
+	    $res2 = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->select(array('played_sim.*', 'match.matchDate', 'match.matchTime', 'match.home', 'match.away', 'match.season', 'match.resultShort'))
+			->where('resultShort', '=', 'D')
+			->where('matchDate', '<=', $enddate)
+			->where('matchDate', '>', $startdate)
+			->where('season', '=', $season)
+			->where('current_length', '>=', $count)
+	        ->orderBy('matchDate')
+	        ->orderBy('home');
+
+	    $income = $income + $res2->sum('income'); 
+	    $profit = $profit + $res2->sum('profit'); 
+
+	    $matches = $res1->get();
+	    // return $matches;
+	    foreach ($matches as $match) {
+	    	$played_sim = PlayedSim::where('id', '=', $match->id)->first();
+	    	$played_sim->bsf = $bsfpm;
+	    	$played_sim->bet = $bsfpm*$mul;
+	    	$played_sim->income = $played_sim->bet*$played_sim->odds;
+	    	$played_sim->profit = $played_sim->bet*$played_sim->odds - $played_sim->bet - $played_sim->bsf;
+	    	$played_sim->save();
+	    }
+
+	    
+
+		return View::make('usasim')->with(array('data' => $res1->get(), 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'startdate' => $startdate, 'enddate' => $enddate));
+
+	}
+
+
+	
+
+	public function getSimMatchesusa($season = '2012', $startdate = '2012-03-08', $enddate = '2012-03-12') {
+
+        $res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->where('season', '=', $season)
+	        ->where('matchDate', '>', $startdate)
+	        ->where('matchDate', '<=', $startdate)
+	        ->orderBy('season')
+	        ->orderBy('matchDate')
+	        ->orderBy('home')
+	        ->get(); 
+
+		return View::make('usasim')->with(array('data' => $res, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0, 'startdate' => $startdate, 'enddate' => $enddate));
+	}
+
+	public function getSimMatchesusa2($season = '2012', $startdate = '2012-03-08', $enddate = '2012-03-12') {
+
+        $res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
+			->where('season', '=', $season)
+	        ->where('matchDate', '>', $startdate)
+	        ->where('matchDate', '<=', $startdate)
+	        ->orderBy('season')
+	        ->orderBy('matchDate')
+	        ->orderBy('home')
+	        ->get(); 
+
+		return View::make('bsim')->with(array('data' => $res, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0));
+	}

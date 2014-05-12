@@ -11,55 +11,30 @@
 @stop
 
 @section('pageHeader')
-	@include('layouts.partials.header', array('calendar' => true, 'big' => "Hello page", 'small' => ''))
+	@include('layouts.partials.pageheader', array('calendar' => true, 'big' => "Hello page", 'small' => ''))
 @stop
 
 @section('content')
     
-    @include('layouts.partials.square', array('data' => $data))
+	@foreach($data as $match)
+		<?php
+			$date = $match->matchDate;
+			// echo $date->format('l');
+			$round = 1;
+			$mid = false;
+			$wd = date('l', strtotime( $date )); 
+			// echo $wd." round $round";
+			if (!$mid && ($wd == 'Tuesday' || $wd == 'Tuesday' || $wd == 'Wednesday' || $wd == 'Thursday')) {
+				$round += 1;
+				$mid = true;
+			} 
+			if ($mid && ($wd == 'Friday' || $wd == 'Saturday' || $wd == 'Sunday' || $wd == 'Monday')){
+				$round += 1;
+				$mid = false;
+			}
+			echo $wd." $round round<br>";
+		?>
+		  {{$match->matchTime}} <br>
+	@endforeach
 
-@stop
-
-@section('footer')
-	    <script type="text/javascript">
-    // Grab all elements with the class "hasTooltip"
-    $('.hasTooltip').each(function() { // Notice the .each() loop, discussed below
-        $(this).qtip({
-            content: {
-                text: $(this).attr('title')
-            },
-        style: {
-            classes: 'qtip-light qtip-shadow qtip-rounded'
-        },
-        position: {
-            viewport: $(window)
-        }
-        });
-    });
-    </script>
-	<script type="text/javascript">
-	  $('#datepickid div').datepicker({
-	    format: "dd.mm.yy",
-	    weekStart: 1,
-	    orientation: "top auto",
-	    // autoclose: false,
-	    todayHighlight: true,
-	    multidate: true,
-	    multidateSeparator: " to ",
-	    beforeShowDay: function (date) {
-	      if (date.getMonth() == (new Date()).getMonth())
-	        switch (date.getDate()){
-	          case 4:
-	            return {
-	              tooltip: 'Example tooltip',
-	              classes: 'text-danger'
-	            };
-	          case 8:
-	            return false;
-	          case 12:
-	            return "green";
-	        }
-	    }
-    });
-	</script>
 @stop

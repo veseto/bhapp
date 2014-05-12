@@ -11,11 +11,39 @@
 |
 */
 
+//stats
+
+Route::get('/drawstats/{country}/{league}', 'SeriesController@percentStat');
+Route::get('/drawspercent', 'SeriesController@percentDraws');
+Route::get('/roundpercent/{country}/{league}', 'SeriesController@percentDrawsPerRound');
+
+Route::get('/simulator/{country}/{league}', 'SimulatorController@getSimMatches');
+Route::post('/simulator', 'SimulatorController@newSim');
+
+// Route::get('/simusa/{startdate?}/{enddate?}', 'MatchController@getSimMatchesusa')-> before('auth');
+
+// Route::post('/simusa', 'MatchController@newSimusa');
+// Route::post('/nextusa', 'MatchController@nextusa');
+
+
+Route::get('/bsim/{season?}/{round?}', 'MatchController@getSimMatches')-> before('auth');
+Route::post('/save', 'MatchController@save')-> before('auth');
+// Route::get('/simstart', 'MatchController@startSim')-> before('auth');
+Route::post('/bsim', 'MatchController@newSim');
+Route::post('/next', 'MatchController@next');
+Route::get('/sim/{season?}/{round?}', 'MatchController@getSimMatches2')-> before('auth');
+Route::get('/simstart', 'MatchController@startSim')-> before('auth');
+Route::post('/sim', 'MatchController@newSim2');
+Route::post('/next2', 'MatchController@next2');
 
 Route::get('/calculateseries/{country}', "SeriesController@calculatePPSSeries");
+Route::get('/calculateseries/{country}/{team}', "SeriesController@calculatePPSSeriesForTeam");
+Route::get('/updateseries', "SeriesController@updateAllPPSSeries");
+
 Route::get('/calculateseriesppm', "SeriesController@calculatePPMSeries");
 
 Route::get('/show', "SeriesController@getSeries");
+// Route::get('/hello', "HomeController@show");
 
 Route::get('login', 'SessionsController@create');
 
@@ -36,9 +64,12 @@ Route::post('/settings/disable', "SettingsController@deleteIgnore");
 // 	$data['match'] = $m;
 // 	return View::make('hello')->with('data', $data);
 // })-> before('auth');
-Route::get('/matches/{from?}/{to?}', array('as' => 'matches', 'uses' => 'MatchController@getMatches'))-> before('auth');
 
-Route::get('/home/{from?}/{to?}', array('as' => 'home', 'uses' => 'MatchController@getMatches'))-> before('auth');
+Route::get('/home/{from?}/{to?}', array('as' => 'matches', 'uses' => 'MatchController@getMatches'))-> before('auth');
+Route::get('/', array('as' => 'matches', 'uses' => 'MatchController@getMatches'))-> before('auth');
+
+Route::get('/matches/{from?}/{to?}', 'MatchController@getMatches')-> before('auth');
+// Route::get('/simstart', 'MatchController@startSim')-> before('auth');
 
 Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'))-> before('auth');
 

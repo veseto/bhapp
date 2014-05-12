@@ -70,7 +70,7 @@
 								  		@if($s[$j] != NULL && $s[$j]->ignore != 1)
 					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $s[$j]->min_start }}">
 					  			  	    @else 
-					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
+					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
 					  			  	    @endif
 								  </td>
 							  @endfor
@@ -134,7 +134,7 @@
 								  		@if($settings[$j] != NULL && $settings[$j]->ignore != 1)
 					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $settings[$j]->min_start }}">
 					  			  	    @else 
-					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="0" disabled>
+					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
 					  			  	    @endif
 								  </td>
 							  @endfor
@@ -216,22 +216,23 @@
 <!-- js for tabs -->
 <script type="text/javascript">
 	$(".activate_league_for_play").change(function(){
+		//$(this).siblings("input").prop('disabled', function (_, val) { return ! val; });
 		if (this.checked) {
 			// alert("boo");
-			// $(this).siblings("input").prop("disabled", false);
+			 $(this).siblings("input").prop("disabled", false);
 			// var url = "/settings/"+$(this).parent().parent().attr("id")+"/"+$(this).parent().attr("id")+"/"+$(this).siblings("input").val()+"/enable";
 			// alert(url);
-			$.post("/settings/enable",
-	            {
-	                "league": $(this).parent().parent().attr("id"),
-	                "game": $(this).parent().attr("id"),
-	                "min": $(this).siblings("input").val()
-	            },
-	            function( data ) {
-	                //do something with data/response returned by server
-	            },
-	            'json'
-	        );
+			// $.post("/settings/enable",
+	  //           {
+	  //               "league": $(this).parent().parent().attr("id"),
+	  //               "game": $(this).parent().attr("id"),
+	  //               "min": $(this).siblings("input").val()
+	  //           },
+	  //           function( data ) {
+	  //               //do something with data/response returned by server
+	  //           },
+	  //           'json'
+	  //       );
 		} else {
 			$.post("/settings/disable",
 	            {
@@ -244,8 +245,9 @@
 	            },
 	            'json'
 	        );
+	        $(this).siblings("input").prop("disabled", true);               
+
 		};
-		// $(this).siblings("input").prop("disabled", true);               
 	});
 	$(".min_start").focusout(function(){
 		$.post("/settings/enable",

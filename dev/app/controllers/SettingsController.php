@@ -67,11 +67,11 @@ class SettingsController extends BaseController {
 		foreach ($matches as $match) {
 			$played = Played::where('game_type_id', '=', $settings->game_type_id)
 				->where('match_id', '=', $match->end_match_id)
-				->where('user_id', '=', Auth::user()->end_match_id)
+				->where('settings_id', '=', $settings->id)
 				->count();
 			if($played == 0 || $played == '0') {
 				$pl = new Played;
-				$pl->user_id = Auth::user()->id;
+				$pl->settings_id =$settings->id;
 				$pl->game_type_id = $settings->game_type_id;
 				$pl->match_id = $match->end_match_id;
 				$pl->current_length = $match->current_length;

@@ -42,7 +42,11 @@
 			<a href="" class="btn btx-xs btn-primary" id="hidden">GO</a>
 		</div>
 	</div>
-	   
+	
+	<a href="/roundpercent/poland/ekstraklasa">% draws per round</a><br>
+	<a href="/drawstats/poland/ekstraklasa">series length allocation</a><br>
+	<a href="/drawspercent">% draws per year</a><br>
+
 	<script type="text/javascript">
 		var arrayFromPHP = <?php echo json_encode($data) ?>;
 			var arr = new Array();

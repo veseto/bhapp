@@ -209,7 +209,7 @@
 	$start = time();
 	//$q = "SELECT * from `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where leagueDetails.leagueId=4";
 	// echo "$q<br>";
-	$q = "SELECT `match`.id, country, fullName, season, alternativeName, alternativeName2 FROM `match` left join leagueDetails on leagueDetails.id=`match`.league_details_id where (resultShort='-' or resultShort='') and league_details_id=".$_GET['id'];
+	$q = "SELECT `match`.id, country, fullName, season, alternativeName, alternativeName2 FROM `match` left join leagueDetails on leagueDetails.id=`match`.league_details_id where league_details_id=".$_GET['id'];
 	$res = $mysqli->query($q);
 	// echo $mysqli->error;
 	while ($row = $res->fetch_assoc()) {
@@ -227,7 +227,7 @@
 			return;
 		}
 		getMatchOdds($row['id']);
-		parseMatchDetails($url, $row['id'], $row['season']);
+		//parseMatchDetails($url, $row['id'], $row['season']);
 	}
 	$end = time();
 

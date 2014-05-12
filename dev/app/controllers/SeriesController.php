@@ -3,7 +3,7 @@
 class SeriesController extends BaseController {
 
 	public function calculatePPMSeries() {
-		$leagues = LeagueDetails::whereIn('id', array(1, 17, 35, 39, 6, 100, 69))->get();
+		$leagues = LeagueDetails::where('ppm', '=', 1)->get();
 
 		foreach ($leagues as $league) {
 			$matches = Match::where('league_details_id', '=', $league->id)->orderBy('matchDate')->orderBy('matchTime')->get();
@@ -111,6 +111,69 @@ class SeriesController extends BaseController {
 		return "ended in $time sec";
 	}
 
+	public function calculatePPSSeriesForTeam($country, $team) {
+		$start = time();
+		$ids = LeagueDetails::where('country', '=', $country)->lists('id');
+			
+		$regexp = $team;
+			
+		    // $ids = \DB::table('series')->lists('end_match_id');
+
+		$matches = Match::whereIn('league_details_id', $ids)
+			->where(function($query) use ($regexp)
+	        {
+	            $query->where('home', '=', $regexp)
+	                  ->orWhere('away', '=', $regexp);
+	        })
+			->orderBy('matchDate', 'asc')->orderBy('matchTime', 'asc')->get();
+		$prev_season = '2003-2004';
+		$prev_league = '-1';
+		foreach ($matches as $match) {
+			for ($i = 1; $i < 5; $i ++) {
+				$note = "";
+				$series = Series::where('team', '=', $team)->where('active', '=', 1)->where('game_type_id', '=', $i)->first();
+				if ($series == NULL) {
+					$series = new Series;
+					$series->team = $team;
+					$series->game_type_id = $i;
+					$series->current_length = 0;
+					$series->start_match_id = $match->id;
+					$series->active = 1;
+					$series->save();
+				}
+
+				$series->current_length = $series->current_length + 1;
+				$series->end_match_id = $match->id;
+				$series->league_details_id = $match->league_details_id;
+				
+				if ($this->endSeries($match, $i)) {
+					$series->active = 0;
+					$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
+					->where('end_match_id', '=', $series->end_match_id)
+					->where('team', '=', $team)
+					->where('current_length', '=', $series->current_length)
+					->where('game_type_id', '=', $series->game_type_id)->first();
+					if ($duplicate) {
+						$duplicate->delete();
+					}
+				}
+				
+				if ($match->league_details_id != $prev_league) {
+					$note = "continued from $prev_league in ".$match->league_details_id." league";
+				}
+				$series->note = $note;
+
+				$series->save();
+			}
+			$prev_league = $match->league_details_id;
+			$prev_season = $match->season;
+			if ($match->resultShort == '-' || $match->resultShort == '')
+				break 1;
+		}			
+		$time = time() - $start;
+		return "ended in $time sec";
+	}
+
 	public function endSeries($match, $type) {
 		switch ($type) {
 			case '1':
@@ -155,51 +218,70 @@ class SeriesController extends BaseController {
 		return $res;
 	}
 
-	public function updateAllPPSSeries($team) {
+	public function updateAllPPSSeries() {
 		$today = date('Y-m-d', time());
-		$matches = Match::where('matchDate', '<=', $today)->where('resultShort', '=', '-')->get();
+
+		$matches = Match::leftJoin('series', 'series.end_match_id', '=', 'match.id')
+					->where('matchDate', '<=', "$today")
+					->where('match.league_details_id', '=', 85)
+					->where('active', '=', 1)
+					->groupBy('end_match_id')
+					->get();
 		foreach ($matches as $match) {
-			$match = Match::updateMatchDetails($match->id);
-			
+
+			$match = Match::updateMatchDetails($match);
 			for ($i = 0; $i < 5; $i ++) {
-				$series = Series::where('end_match_id', '=', $match->id)->where('game_type_id', '=', $i)->where('active', '=', 1)->first();
-				if ($series == NULL) {
+				$seriesArr = Series::where('end_match_id', '=', $match->id)->where('game_type_id', '=', $i)->where('active', '=', 1)->get();
+				foreach ($seriesArr as $series) {
+		
+				// if ($seriesArr == NULL) {
+					// break 1;
+					// $series1 = new Series;
+					// $series1->team = $match->home;
+					// $series1->game_type_id = $i;
+					// $series1->current_length = 0;
+					// $series1->start_match_id = $match->id;
+					// $series1->active = 1;
+					// $series1->save();
+					// $series2 = new Series;
+					// $series2->team = $match->away;
+					// $series2->game_type_id = $i;
+					// $series2->current_length = 0;
+					// $series2->start_match_id = $match->id;
+					// $series2->active = 1;
+					// $series2->save();
+					// $seriesArr = array($series1, $series2 );
+				// }
+
+				// foreach ($seriesArr as $series) {
+					
+					$series->current_length = $series->current_length + 1;
+					$series->end_match_id = $match->id;
+					$next_id = Match::getNextMatchForTeam($series->team, $match)->id;
+					if ($this->endSeries($match, $i)) {
+						$series->active = 0;
+						$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
+						->where('end_match_id', '=', $series->end_match_id)
+						->where('team', '=', $series->team)
+						->where('current_length', '=', $series->current_length)
+						->where('game_type_id', '=', $series->game_type_id)->first();
+						if ($duplicate) {
+							$duplicate->delete();
+						}
+						$series->save();
 						$series = new Series;
-						$series->team = $team->home;
+						$series->team = $match->team;
 						$series->game_type_id = $i;
 						$series->current_length = 0;
-						$series->start_match_id = $match->id;
+						$series->start_match_id = $next_id;
+						$series->end_match_id = $next_id;
 						$series->active = 1;
 						$series->save();
+
+					} else {
+						$series->end_match_id = $next_id;
+						$series->save();
 					}
-
-				$series->current_length = $series->current_length + 1;
-				$series->end_match_id = $match->id;
-				$next_id = Match::getNextMatchForTeam($team->home, $match)->id;
-				if ($this->endSeries($match, $i)) {
-					$series->active = 0;
-					$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
-					->where('end_match_id', '=', $series->end_match_id)
-					->where('team', '=', $team->home)
-					->where('current_length', '=', $series->current_length)
-					->where('game_type_id', '=', $series->game_type_id)->first();
-					if ($duplicate) {
-						$duplicate->delete();
-					}
-					$series->save();
-					$series = new Series;
-					$series->team = $team->home;
-					$series->game_type_id = $i;
-					$series->current_length = 0;
-					$series->start_match_id = $next_id;
-					$series->end_match_id = $next_id;
-					$series->active = 1;
-					$series->save();
-
-				} else {
-					$series->end_match_id = $next_id;
-					$series->save();
-
 				}
 			}
 		}
@@ -219,4 +301,92 @@ class SeriesController extends BaseController {
 		}
 		return $res;
 	}
+
+
+	public function percentStat($country, $league) {
+		$leagueDetails = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $league)->first();
+		$res = array();
+		$seasons = ImportedSeasons::distinct()->where('league_details_id', '=', $leagueDetails->id)->get();
+		foreach ($seasons as $season) {
+			$res[$season->season] = array();
+			for($i = 1; $i < 16; $i ++){
+				$count = Series::join('match', 'match.id', '=', 'series.end_match_id')
+					->where('match.league_details_id', '=' , $leagueDetails->id)
+					->where('game_type_id', '=', 1)
+					->where('season', '=', $season->season)->where('current_length', '=', $i)->count();
+				$res[$season->season][$i] = $count;
+			}
+			$res[$season->season][16] = Series::join('match', 'match.id', '=', 'series.end_match_id')
+					->where('match.league_details_id', '=' , $leagueDetails->id)
+					->where('game_type_id', '=', 1)
+					->where('season', '=', $season->season)->where('current_length', '>', 15)->count();
+			$res[$season->season][17] = Series::join('match', 'match.id', '=', 'series.end_match_id')
+					->where('match.league_details_id', '=' , $leagueDetails->id)
+					->where('game_type_id', '=', 1)
+					->where('season', '=', $season->season)->count();
+		}
+
+		return View::make('drawstats')->with(array('country' => $country, 'league' => $league, 'data' => $res));
+		
+	}
+
+
+	public function percentDraws() {
+		$leagueDetails = LeagueDetails::all();
+		$res = array();
+		foreach ($leagueDetails as $league) {
+		
+			$seasons = ImportedSeasons::distinct()->where('league_details_id', '=', $league->id)->get();
+			foreach ($seasons as $season) {
+				$count = DB::table('match')
+					->where('league_details_id', '=', $league->id)
+					->where('resultShort', '=', 'D')
+					->where('season', '=', $season->season)
+					->count();
+				$countAll = DB::table('match')
+					->where('league_details_id', '=', $league->id)
+					->where('season', '=', $season->season)
+					->count();
+
+				$res[$league->country][$league->fullName][$season->season][0] = $count;
+				$res[$league->country][$league->fullName][$season->season][1] = $countAll;
+			}
+
+			
+		}
+		// return $res;
+		return View::make('drawspercent')->with(array('data' => $res));
+		
+	}
+
+	public function percentDrawsPerRound($country, $league) {
+		$leagueDetails = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $league)->first();
+		$res = array();
+		$seasons = ImportedSeasons::distinct()->where('league_details_id', '=', $leagueDetails->id)->get();
+		foreach ($seasons as $season) {
+			$res[$season->season] = array();
+			$rounds = Match::where('league_details_id', '=', $leagueDetails->id)
+					->where('season', '=', $season->season)
+					->orderBy('matchDate')
+					->lists('round');
+			foreach ($rounds as $round) {
+				$res[$season->season][$round][0] = Match::where('league_details_id', '=', $leagueDetails->id)
+					->where('season', '=', $season->season)
+					->where('round', '=', $round)
+					->orderBy('matchDate')
+					->select(DB::raw('count(*) as total'))
+					->first()->total;
+				$res[$season->season][$round][1] = Match::where('league_details_id', '=', $leagueDetails->id)
+					->where('season', '=', $season->season)
+					->where('resultShort', '=', 'D')
+					->where('round', '=', $round)
+					->orderBy('matchDate')
+					->select(DB::raw('count(*) as total'))
+					->first()->total;
+			}
+		}
+		return View::make('roundpercent')->with(array('country' => $country, 'league' => $league, 'data' => $res));
+		
+	}
+
 }

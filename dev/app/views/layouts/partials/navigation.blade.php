@@ -5,7 +5,8 @@
 		    <li class="{{Request::path() == 'home' ? 'active' : '';}}" ><a href="{{ URL::to('home') }}">home</a></li>
 		    <li class="{{Request::path() == 'countries' ? 'active' : '';}}"><a href="{{ URL::to('countries') }}">statistics</a></li>
 		    <li><a href="#">livescore</a></li>
-		    <li><a href="#">streaks</a></li>
+		    <li><a href="{{URL::to('/bsim')}}">bsim</a></li>
+		    <li><a href="{{URL::to('/sim')}}">sim</a></li>
 		    <li class="dropdown">
 		      <a href="#" class="dropdown-toggle" data-toggle="dropdown">dropdown <b class="caret"></b></a>
 		      <ul class="dropdown-menu">

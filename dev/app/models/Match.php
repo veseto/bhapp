@@ -13,10 +13,10 @@ class Match extends Eloquent {
     	return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season)->orderBy('matchDate', 'ASC')->orderBy('matchTime', 'ASC');
 
     }
-
+    
     public static function updateMatchDetails($match) {
-
-    	return $this->parseMatchDetails($match);
+    	return $match;
+    	return Match::parseMatchDetails($match);
     	
     }
 
@@ -26,11 +26,12 @@ class Match extends Eloquent {
 	}
 
 	private static function parseMatchDetails($match) {
-
+		return $match;
 		$baseUrl = "http://www.betexplorer.com/soccer/";
-		$url = $baseUrl."matchdetails.php?matchid=".$matchId;
+		$url = $baseUrl."matchdetails.php?matchid=".$match->id;
 		// echo "***  $matchId $url ***<br>";
-		if(get_http_response_code($url) != "200"){
+		return $url;
+		if(Match::get_http_response_code($url) != "200"){
 			//  "Wrong match details url! --> $url";
 			return;
 		}
@@ -113,6 +114,8 @@ class Match extends Eloquent {
 				}
 			} 
 		}
+
+		$match->matchTime = $this->parseTime($matchId);
 
 		$match->save();
 		if ($tables->length == 3) {
@@ -216,6 +219,26 @@ class Match extends Eloquent {
 				}
 		    }
 		}
+	}
+
+
+	private function parseTime($matchId) {
+		$url = "http://www.betexplorer.com/soccer/poland/ekstraklasa/piast-gliwice-slask-wroclaw/$matchId/";
+		$data = file_get_contents($url);
+
+		//echo "$url<br>";
+
+		$dom = new domDocument;
+
+		@$dom->loadHTML($data);
+		$dom->preserveWhiteSpace = false;
+		
+		$dateElement = $dom->getElementById('nm-date')->getAttribute('data-dt');
+
+		$arr = explode(',', $dateElement);
+		$time = $arr[3].':'.$arr[4].":00";
+		// print_r($dateElement);
+		return $time;
 	}
 
 	public static function getNextMatchForTeam($team, $match) {
