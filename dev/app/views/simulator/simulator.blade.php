@@ -1,7 +1,6 @@
 @extends('layout')
 
 @section('breadcrumbs')
-	<!-- breadcrumbs -->
 	<?php
 		$list = array('Home' => URL::to("home"), 'countries' => URL::to('countries'));
 		$active = 'Simulator';
@@ -24,22 +23,20 @@
 		{{Form::label('league', 'League')}}
 		{{Form::text('league', $league)}}<br>
 
-		{{Form::label('offset', 'offset')}}
-		{{Form::text('offset', $offset)}}<br>
-	
 		{{Form::label('season', 'season')}}
 		{{Form::text('season', $season)}}<br>
 
-		{{Form::label('count', 'Start series length')}}
+		{{Form::label('count', 'length')}}
+		{{Form::text('lt', $lt)}}
 		{{Form::text('count', $count)}}<br>
 
-		{{Form::label('multiply', 'x')}}
+		{{Form::label('offset', 'offset')}}
+		{{Form::text('offset', $offset)}}<br>
+
+		{{Form::label('multiply', 'multiplier')}}
 		{{Form::text('multiply', $multiply)}}<br>
 
-		{{Form::label('less than or grater then', 'x')}}
-		{{Form::text('lt', $lt)}}<br>
-
-		{{Form::label('init', 'Initial bet')}}
+		{{Form::label('init', 'Initial')}}
 		{{Form::text('init', $init)}}<br>
 
 		{{Form::submit('Start new sim')}}
@@ -49,90 +46,36 @@
 		<table id="sim">
 		
 		<tbody>
-			<?php 
-				$totalbet = 0;
-				$totalbsf = 0;
-			?>
-			@foreach($data as $d)
-				<?php
-					$totalbet += $d->bet;
-					$totalbsf += $d->bsf;
-				?>
-				<tr class="{{$d->match_id}}" id="{{$d->match_id}}">
-					<td>{{$d->matchDate}}</td>
-					<td>{{$d->matchTime}}</td>
-					<td>{{$d->round}}</td>
-					<td>{{$d->season}}</td>
-					<td>
-					@if($d->team == $d->home)
-					<strong>{{$d->home}}</strong>
-					@else
-					{{$d->home}}
-					@endif
-					</td>
-					<td>
-					@if($d->team == $d->away)
-					<strong>{{$d->away}}</strong>
-					@else
-					{{$d->away}}
-					@endif
-					</td>
-					<td>{{$d->resultShort}}</td>
-					<td>{{$d->current_length}}</td>
-					<td>{{$d->bsf}}</td>
-					<td class="editable" id="{{$d->id}}">{{$d->bet}}</td>
-					<td class="editable" id="{{$d->id}}">{{$d->odds}}</td>
-					<td>{{$d->income}}</td>
-					<td>{{$d->profit}}</td>
-
-				</tr>
+			@foreach($data as $season=>$dd)
+				@foreach($dd as $round=>$d)
+					<tr>
+						<td>{{$season}}</td>
+						<td>{{$round}}</td>
+						<td>{{$d['bsf']}}</td>
+						<td>{{$d['adj']}}</td>
+						<td>{{$d['bet']}}</td>
+						<td>{{$d['acc']}}</td>
+						<td>{{$d['all_draws']}}/{{$d['all_matches']}}</td>
+						<td>{{$d['draws_played']}}/{{$d['all_played']}}</td>
+						<td>{{$d['income']}}</td>
+						<td>{{$d['real']}}</td>
+					</tr>
+				@endforeach
 			@endforeach
+			</tr>
 		</tbody>
 		<thead>
 			<tr>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="date"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="time"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="round"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="season"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="home"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="away"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="res"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-			</tr>
-			<tr>
-				<th>date</th>
-				<th>time</th>
-				<th>round</th>
 				<th>season</th>
-				<th>home</th>
-				<th>away</th>
-				<th>result</th>
-				<th>length</th>
+				<th>round</th>
 				<th>bsf</th>
+				<th>adjustments</th>
 				<th>bet</th>
-				<th>odds</th>
+				<th>acc</th>
+				<th>matches</th>
+				<th>series</th>
 				<th>income</th>
-				<th>profit</th>
-			</tr>
-			<tr>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th>{{$totalbsf}}</th>
-				<th>{{$totalbet}}</th>
-				<th></th>
-				<th></th>
-				<th></th>
+				<th>acc state</th>
 			</tr>
 		</thead>
 	</table>
@@ -191,7 +134,11 @@
 		var oTable = $("#sim").dataTable({
 	    	    "iDisplayLength": 100,
 	    	    "bJQueryUI": true,
-	    	    "sPaginationType": "full_numbers"
+	    	    "sPaginationType": "full_numbers",
+	    	    "sDom": '<"top" Tlf>irpti<"bottom"pT><"clear">',
+					"oTableTools": {
+						"sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+					}
 			});
 		$("thead input").keyup( function () {
 		/* Filter on the column (the index) of this element */
@@ -221,32 +168,6 @@
 				this.value = asInitVals[$("thead input").index(this)];
 			}
 		} );
-
-		/* Apply the jEditable handlers to the table */
-		    oTable.$('td.editable').editable( '/save', {
-	        "callback": function( sValue, y ) {
-	           //	alert(y[0]);
-	            var aPos = oTable.fnGetPosition( this );
-	            var arr = sValue.split("#");
-
-	            oTable.fnUpdate( arr[0], aPos[0], 9 );
-	           	oTable.fnUpdate( arr[1], aPos[0], 10 );
-	            oTable.fnUpdate( arr[2], aPos[0], 11 );
-	            oTable.fnUpdate( arr[3], aPos[0], 12 );
-	            oTable.fnUpdate( arr[4], aPos[0], 8 );
-	    
-	            //oTable.fnClearTable();
-            	//oTable.fnReloadAjax() ;
-	        },
-	        "submitdata": function ( value, settings ) {
-	            return {
-	                "row_id": this.parentNode.getAttribute('id'),
-	                "column": oTable.fnGetPosition( this )[2]
-	            };
-	        },
-	        "height": "25px",
-	        "width": "40px"
-	    } );
 	});
 	</script>
 	@endif

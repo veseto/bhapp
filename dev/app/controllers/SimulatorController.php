@@ -7,8 +7,11 @@ class SimulatorController extends BaseController {
 		$league_details_id = LeagueDetails::where('country', '=', $country)
 				->where('fullName', '=', $league)->first()->id;
         
-		$count = Simulator::where('user_id', '=', Auth::user()->id)->count();
-		if ($count == 0) {
+		$tmp = Simulator::join('match', 'simulator.match_id', '=', 'match.id')
+					->where('user_id', '=', Auth::user()->id)
+					->where('league_details_id', '=', $league_details_id)
+					->get();
+		if (count($tmp) == 0) {
 
 	        $seasons = ImportedSeasons::where('league_details_id', '=', $league_details_id)
 	        		->distinct()
@@ -34,13 +37,10 @@ class SimulatorController extends BaseController {
 		        ->whereIn('season', $seasons)
 		        ->orderBy('season')
 		        ->orderBy('int')
+		        ->distinct('match.id')
 		        ->get();
 		       	
-		       	// ret
-		       	if ($team == 'Arles-Avignon'){ 
-					
-					return View::make('simulator.simulator')->with(array('data' => $matches, 'country' => $country, 'league' => $league, 'count' => 0, 'init' => 0, 'multiply' => 0, 'offset' => 0, 'season' => 0, 'lt' => '<'));
-				}
+		    
 		        foreach ($matches as $match) {
 			        	
 			        	$played = new Simulator;
@@ -60,7 +60,7 @@ class SimulatorController extends BaseController {
 
 			}
 		}
-		return View::make('simulator.simulator')->with(array('country' => $country, 'league' => $league, 'count' => 0, 'init' => 0, 'multiply' => 0, 'offset' => 0, 'season' => 0, 'lt' => '<'));
+		return View::make('simulator.simulator')->with(array('country' => $country, 'league' => $league, 'count' => 0, 'init' => 0, 'multiply' => 0, 'offset' => 0, 'season' => 0, 'lt' => '<='));
 	}	
 
 	public function newSim() {
@@ -69,13 +69,17 @@ class SimulatorController extends BaseController {
 		$count = Input::get('count');
 		$roundoffset = Input::get('offset');
 		$seasonoffset = Input::get('season');
-		$income = Input::get('income');
+		// $income = Input::get('income');
 		$profit = Input::get('profit');
 		$mul = Input::get('multiply');
 		$init = Input::get('init');
 		$lt = Input::get('lt');
 
-		$roundoffset = ($roundoffset == 0)?1:$roundoffset;
+		$bet = $init;
+		$bsf = 0;
+		$account = 0;
+		$income = 0;
+		$accountstate = 0;
 
 		$league_details_id = LeagueDetails::where('country', '=', $country)
 					->where('fullName', '=', $league)->first()->id;
@@ -88,115 +92,151 @@ class SimulatorController extends BaseController {
 	        		->lists('season');
 	    // return $roundoffset;
         sort($seasons);
+        $result = array();
 
 		for($i = $seasonoffset; $i < 3; $i ++) {
 			$rounds = Match::where('season', '=', $seasons[$i])
 				->where('league_details_id', '=', $league_details_id)
 				->distinct('round')
-				->orderBy('matchDate')
 				->lists('round');
-				// return $rounds;
-			for($j = $roundoffset - 1; $j < count($rounds); $j ++) {
-				$res = $this->getQuery($league_details_id, $seasons[$i], $rounds[$j], $lt, $count);
-				if ($res->count() > 0) {
-					return View::make('simulator.simulator')->with(array('data' => $res->get(), 'country' => $country, 'league' => $league, 'count' => $count, 'init' => $init, 'multiply' => $mul, 'offset' => $roundoffset, 'season' => $seasonoffset, 'lt' => $lt));
+
+			for($j = 1 + $roundoffset; $j <= count($rounds); $j ++) {
+				$result[$seasons[$i]][$j] = array();
+				
+				$res_c = Match::join('mapping', 'mapping.round', '=', 'match.round')
+					->where('int', '=', $j)
+					->where('season', '=', $seasons[$i])
+				    ->where('league_details_id', '=', $league_details_id);
+				    
+				$result[$seasons[$i]][$j]['all_matches'] = $res_c->count();
+				$result[$seasons[$i]][$j]['all_draws'] = $res_c->where('resultShort', '=', 'D')->count();
+
+				
+				$res = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
+		        	->join('mapping', 'mapping.round', '=', 'match.round')
+					->where('int', '=', $j)
+					->where('season', '=', $seasons[$i])
+					->where('user_id', '=', Auth::user()->id)
+				    ->where('league_details_id', '=', $league_details_id)
+					->where('current_length', $lt, $count)
+			        ->orderBy('season')
+			        ->orderBy('home');
+				$roundMatches = $res->get();
+				$cm = count($roundMatches);
+				if ($cm > 0) {
+					$result[$seasons[$i]][$j]['all_played'] = $cm;
+					$bsfpm = round($bsf/$cm, 0, PHP_ROUND_HALF_UP);
+					$betpm = round($bet/$cm, 0, PHP_ROUND_HALF_UP);
+					foreach ($roundMatches as $rm) {
+						$simulator = Simulator::where('id', '=', $rm->id)->where('user_id', '=', Auth::user()->id)->first();
+				    	$simulator->bsf = $bsfpm;
+				    	$simulator->bet = $betpm;
+				    	$simulator->income = $simulator->bet*$simulator->odds;
+				    	$simulator->profit = $simulator->bet*$simulator->odds - $simulator->bet - $simulator->bsf;
+				    	$simulator->save();
+					}
+
+					$res1 = $this->getQuery($league_details_id, $seasons[$i], $j, $lt, $count);
+
+					$account = $accountstate - $bet;
+
+					$draws = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
+						->join('mapping', 'mapping.round', '=', 'match.round')
+						->where('int', '=', $j)
+						->where('resultShort', '=', 'D')
+						->where('season', '=', $seasons[$i])
+						->where('user_id', '=', Auth::user()->id)
+					    ->where('league_details_id', '=', $league_details_id)
+						->where('current_length', $lt, $count);
+
+					$income = round($draws->sum('income'), 0, PHP_ROUND_HALF_UP);
+
+				    $result[$seasons[$i]][$j]['draws_played'] = $draws->count();
+
+				    if ($income == NULL || $income == '' || !$income) {
+						$income = 0;
+					} 
+
+					$result[$seasons[$i]][$j]['bet'] = $bet;
+					$result[$seasons[$i]][$j]['bsf'] = $bsf;
+					$result[$seasons[$i]][$j]['income'] = $income;
+
+
+					if ($account < 0) {
+						$adj = -$account;
+						$account = 0;
+					} else {
+						$adj = 0;
+					}
+					$result[$seasons[$i]][$j]['acc'] = $account;
+					$result[$seasons[$i]][$j]['adj'] = $adj;
+					$result[$seasons[$i]][$j]['real'] = $account + $income;
+
+
+					$accountstate = $account + $income;
+
+					$account = $account - $bet + $income;
+
+
+
+					$bet = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
+						->join('mapping', 'mapping.round', '=', 'match.round')
+						->where('int', '=', $j)
+						->where('season', '=', $seasons[$i])
+						->where('user_id', '=', Auth::user()->id)
+					    ->where('league_details_id', '=', $league_details_id)
+						->where('current_length', $lt, $count)
+				        ->orderBy('season')
+				        ->orderBy('home')->where('resultShort', '<>', 'D')->sum('bet');
+					$bsf = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
+						->join('mapping', 'mapping.round', '=', 'match.round')
+						->where('int', '=', $j)
+						->where('season', '=', $seasons[$i])
+						->where('user_id', '=', Auth::user()->id)
+					    ->where('league_details_id', '=', $league_details_id)
+						->where('current_length', $lt, $count)
+				        ->orderBy('season')
+				        ->orderBy('home')->where('resultShort', '<>', 'D')->sum('bsf') + $bet;
+
+				    if ($bsf == 0) {
+				    	$bsf = $init;
+				    }
+					$bet = round($bsf*$mul, 0, PHP_ROUND_HALF_UP);
+					$fin = $res->get();
+					
+
+					// return View::make('simulator.simulator')->with(array('data' => $res->get(), 'country' => $country, 'league' => $league, 'count' => $count, 'init' => $init, 'multiply' => $mul, 'offset' => $roundoffset, 'season' => $seasonoffset, 'lt' => $lt));
+				} else {
+					$result[$seasons[$i]][$j]['acc'] = $account;
+					$result[$seasons[$i]][$j]['bet'] = $bet;
+					$result[$seasons[$i]][$j]['bsf'] = $bsf;
+					$result[$seasons[$i]][$j]['income'] = $income;
+					$result[$seasons[$i]][$j]['adj'] = 0;
+					$result[$seasons[$i]][$j]['real'] = $account + $income;
+					$result[$seasons[$i]][$j]['all_played'] = 0;
+					$result[$seasons[$i]][$j]['draws_played'] = 0;
+
 				}
 
 			}
 		}
-		// 
-		return View::make('simulator.simulator')->with(array('data' => $res->get(), 'country' => $country, 'league' => $league, 'count' => $count, 'init' => $init, 'multiply' => $mul, 'offset' => $roundoffset, 'season' => $seasonoffset, 'lt' => $lt));
+		
+
+		// return $result;
+		return View::make('simulator.simulator')->with(array('data' => $result, 'country' => $country, 'league' => $league, 'count' => $count, 'init' => $init, 'multiply' => $mul, 'offset' => $roundoffset, 'season' => $seasonoffset, 'lt' => $lt));
 
 	}
 
-	private function getQuery($league_details_id, $season, $round, $lt, $count) {
+	private function getQuery($league_details_id, $season, $j, $lt, $count) {
 		return Match::join('simulator', 'simulator.match_id', '=', 'match.id')
-			->where('round', '=', $round)
+			->join('mapping', 'mapping.round', '=', 'match.round')
+			->where('int', '=', $j)
 			->where('season', '=', $season)
 			->where('user_id', '=', Auth::user()->id)
 		    ->where('league_details_id', '=', $league_details_id)
 			->where('current_length', $lt, $count)
 	        ->orderBy('season')
-	        ->orderBy('matchDate')
 	        ->orderBy('home');
-	}
-
-	public function next() {
-		$count = Input::get('count');
-		$round = Input::get('round');
-		$season = Input::get('season');
-		$income = Input::get('income');
-		$profit = Input::get('profit');
-		$mul = Input::get('multiply');
-		$bsfrow = Input::get('bsfrow');
-		
-		$nextround = $round + 1;
-		$nextseason = $season;
-		if ($season == '2012' && $round == 38) {
-			$nextround = 1;
-			$nextseason = '2013';
-		}
-		if ($season == '2013' && $round == 38) {
-			$nextround = 1;
-			$nextseason = '2013-2014';
-		}
-
-		$res1 = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
-			->where('round', '=', $nextround.'. Round')
-			->where('season', '=', $nextseason)
-			->where('user_id', '=', Auth::user()->id)
-			->where('current_length', '>=', $count)
-	        ->orderBy('season')
-	        ->orderBy('matchDate')
-	        ->orderBy('home');
-	        // ->get(); 
-
-
-		$res = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
-			->where('resultShort', '<>', 'D')
-			->where('round', '=', ($round).'. Round')
-			->where('season', '=', $season)
-			->where('user_id', '=', Auth::user()->id)
-			->where('current_length', '>=', $count)
-	        ->orderBy('season')
-	        ->orderBy('matchDate')
-	        ->orderBy('home');
-// ->sum('bet')->get();
-	    $bet = $res->sum('bet');
-	    $bsf = $res->sum('bsf') + $bet; 
-
-	    $count_matches = $res1->count();
-
-	    $bsfpm = round($bsf/$count_matches, 2, PHP_ROUND_HALF_UP);
-
-	    $res2 = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
-			->where('resultShort', '=', 'D')
-			->where('round', '=', ($round).'. Round')
-			->where('season', '=', $season)
-			->where('user_id', '=', Auth::user()->id)
-			->where('current_length', '>=', $count)
-	        ->orderBy('season')
-	        ->orderBy('matchDate')
-	        ->orderBy('home');
-
-	    $income = $income + $res2->sum('income'); 
-	    $profit = $profit + $res2->sum('profit'); 
-
-	    $matches = $res1->get();
-	    // return $matches;
-	    foreach ($matches as $match) {
-	    	$simulator = Simulator::where('id', '=', $match->id)->first();
-	    	$simulator->bsf = $bsfpm;
-	    	$simulator->bet = $bsfpm*$mul;
-	    	$simulator->income = $simulator->bet*$simulator->odds;
-	    	$simulator->profit = $simulator->bet*$simulator->odds - $simulator->bet - $simulator->bsf;
-	    	$simulator->save();
-	    }
-
-	    $bsfrow[$round] = $bsf;
-
-		return View::make('bsim')->with(array('data' => $res1->get(), 'round' => $nextround, 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init')));
-
 	}
 
 }

@@ -1,24 +1,23 @@
 @extends('layout')
 
-@section('breadcrumbs')
-	<!-- breadcrumbs -->
+<!-- @section('breadcrumbs')
 	<?php
 		$list = array();
 		$active = 'Home';
 		$elements = array('active' => $active, 'list' => $list);
 	?>
 	@include('layouts.partials.breadcrumbs', array('elements' => $elements))
-@stop
+@stop -->
 
-@section('pageHeader')
+<!-- @section('pageHeader')
 	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => "Japan simulation", 'small' => 'short series'))
-@stop
+@stop -->
 
 @section('content')
 <p>
 	{{Form::open(array('url' => '/sim'))}}
 
-	{{Form::label('count', 'Start series length')}}
+	{{Form::label('count', 'Length')}}
 	{{Form::text('count', $count)}}
 
 	{{Form::label('multiply', 'x')}}
@@ -34,8 +33,7 @@
 	{{Form::close()}}
 </p>
 <p>
-	{{Form::open(array('action' => 'MatchController@next2'))}}
-	{{Form::submit('next')}}<br>
+	{{Form::open(array('action' => 'MatchController@next2'))}}&nbsp;
 
 	{{Form::hidden('count', $count)}}
 	{{Form::hidden('round', $round)}}
@@ -43,11 +41,14 @@
 	{{Form::hidden('multiply', $multiply)}}
 	{{Form::hidden('init', $init)}}
 
+	{{Form::hidden('inarr', $inarr)}}
+	{{Form::hidden('prarr', $prarr)}}
+
 	{{Form::label('income', 'Income')}}
-	{{Form::text('income', $income, array('readonly'))}}<br>
+	{{Form::text('income', $income, array('readonly'))}}
 	{{Form::label('count', 'Profit')}}
 	{{Form::text('profit', $profit, array('readonly'))}}
-
+	{{Form::submit('next')}}
 	{{Form::close()}}
 
 </p>
@@ -142,6 +143,20 @@
 			</tr>
 		</thead>
 	</table>
+	<?php
+		echo "Income ";
+
+		$in = explode(',', 	$inarr);
+		$bs = explode(',', 	$prarr);
+		for($k = 0; $k < count($in); $k ++){
+			echo $in[$k]."<br>";
+		}
+				echo "BSF ";
+
+		for($k = 0; $k < count($bs); $k ++){
+			echo $bs[$k]."<br>";
+		}
+	?>
 
 	<script type="text/javascript">
 	function fnFormatDetails ( oTable, nTr )

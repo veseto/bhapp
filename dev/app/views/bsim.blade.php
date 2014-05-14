@@ -1,18 +1,17 @@
 @extends('layout')
 
-@section('breadcrumbs')
-	<!-- breadcrumbs -->
+<!-- @section('breadcrumbs')
 	<?php
 		$list = array();
 		$active = 'Home';
 		$elements = array('active' => $active, 'list' => $list);
 	?>
 	@include('layouts.partials.breadcrumbs', array('elements' => $elements))
-@stop
+@stop -->
 
-@section('pageHeader')
+<!-- @section('pageHeader')
 	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => "Japan simulation", 'small' => 'alpha'))
-@stop
+@stop -->
 
 @section('content')
 <p>
@@ -42,6 +41,9 @@
 	{{Form::hidden('season', $season)}}
 	{{Form::hidden('multiply', $multiply)}}
 	{{Form::hidden('init', $init)}}
+
+	{{Form::hidden('inarr', $inarr)}}
+	{{Form::hidden('prarr', $prarr)}}
 
 	{{Form::label('income', 'Income')}}
 	{{Form::text('income', $income, array('readonly'))}}<br>
@@ -142,6 +144,21 @@
 			</tr>
 		</thead>
 	</table>
+
+	<?php
+		echo "Income ";
+
+		$in = explode(',', 	$inarr);
+		$bs = explode(',', 	$prarr);
+		for($k = 0; $k < count($in); $k ++){
+			echo $in[$k]."<br>";
+		}
+				echo "BSF ";
+
+		for($k = 0; $k < count($bs); $k ++){
+			echo $bs[$k]."<br>";
+		}
+	?>
 
 	<script type="text/javascript">
 	function fnFormatDetails ( oTable, nTr )

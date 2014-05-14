@@ -111,23 +111,22 @@ class MatchController extends BaseController {
 		return View::make('matches')->with(array('data' => $res));
 	}
 
-	public function getSimMatches($season = "2013-2014", $round = 1) {
+	public function getSimMatches($season = "2011-2012", $round = 1) {
 
         $res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
 			->where('round', '=', $round.'. Round')
 			->where('season', '=', $season)
 			->where('user_id', '=', Auth::user()->id)
-			
 	        ->orderBy('season')
 	        ->orderBy('matchDate')
 	        ->orderBy('home')
 	        ->get(); 
 
-		return View::make('bsim')->with(array('data' => $res, 'round' => $round, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0));
+		return View::make('bsim')->with(array('data' => $res, 'round' => $round, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0, 'inarr' => '', 'prarr' => ''));
 	}	
 
 
-	public function getSimMatches2($season = "2013-2014", $round = 1) {
+	public function getSimMatches2($season = "2011-2012", $round = 1) {
 
         $res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
 			->where('round', '=', $round.'. Round')
@@ -139,18 +138,17 @@ class MatchController extends BaseController {
 	        ->orderBy('home')
 	        ->get(); 
 
-		return View::make('sim')->with(array('data' => $res, 'round' => $round, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0));
+		return View::make('sim')->with(array('data' => $res, 'round' => $round, 'season' => $season, 'count' => 0, 'income' => 0, 'profit' => 0, 'multiply' => 0, 'init' => 0, 'inarr' => '', 'prarr' => ''));
 	}
 
 
 
 	public function startSim() {
-				$seasons = array("2013-2014");
+		$seasons = array("2011-2012","2012-2013","2013-2014");
 
-		$teams = Match::distinct('home')->where('league_details_id', '=', 11)->whereIn('season', $seasons)->lists('home');
+		$teams = Match::distinct('home')->where('league_details_id', '=', 47)->whereIn('season', $seasons)->lists('home');
 
-		$rounds = 42; 
-
+		$rounds = 38; 
 		foreach ($teams as $team) {
 			$count = 0;
 			foreach ($seasons as $season) {
@@ -165,7 +163,7 @@ class MatchController extends BaseController {
 	        		->where('bookmaker_id', '=', '1')
 	        		->where('round', '=', $i.". Round")
 	        		->distinct('match_id')
-			        ->where('league_details_id', '=', 11)
+			        ->where('league_details_id', '=', 47)
 			        ->where('season', '=', $season)
 			        ->get();
 			        
@@ -204,7 +202,7 @@ class MatchController extends BaseController {
 		// return Redirect::intended("/tmp/$round->season/$arg");
 		$res = Match::join('played_sim', 'played_sim.match_id', '=', 'match.id')
 			->where('round', '=', $arg.'. Round')
-			->where('season', '=', "2013-2014")
+			->where('season', '=', "2011-2012")
 			->where('current_length', '>=', $count)
 			->where('user_id', '=', Auth::user()->id)
 	        ->orderBy('season')
@@ -226,7 +224,8 @@ class MatchController extends BaseController {
 	    	$played_sim->profit = $played_sim->bet*$played_sim->odds - $played_sim->bet - $played_sim->bsf;
 	    	$played_sim->save();
 	    }
-		return View::make('bsim')->with(array('data' => $res->get(), 'round' => $arg, 'season' => Input::get('season'), 'count' => $count, 'income' => 0, 'profit' => 0, 'multiply' => Input::get('multiply'), 'init' => Input::get('init')));
+
+		return View::make('bsim')->with(array('data' => $res->get(), 'round' => $arg, 'season' => Input::get('season'), 'count' => $count, 'income' => 0, 'profit' => 0, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'inarr' => '', 'prarr' => ''));
 
 	}
 
@@ -238,13 +237,16 @@ class MatchController extends BaseController {
 		$profit = Input::get('profit');
 		$mul = Input::get('multiply');
 		$bsfrow = Input::get('bsfrow');
+		$inarr = Input::get('inarr');
+		$prarr = Input::get('prarr');
+
 		$nextround = $round + 1;
 		$nextseason = $season;
-		if ($season == '2011-2012' && $round == 42) {
+		if ($season == '2011-2012' && $round == 38) {
 			$nextround = 1;
 			$nextseason = '2012-2013';
 		}
-		if ($season == '2012-2013' && $round == 42) {
+		if ($season == '2012-2013' && $round == 38) {
 			$nextround = 1;
 			$nextseason = '2013-2014';
 		}
@@ -288,8 +290,11 @@ class MatchController extends BaseController {
 	        ->orderBy('matchDate')
 	        ->orderBy('home');
 
-	    $income = $income + $res2->sum('income'); 
-	    $profit = $profit + $res2->sum('profit'); 
+	    $income_round = $res2->sum('income'); 
+	    $profit_round = $res2->sum('profit');
+
+	    $income = $income + $income_round; 
+	    $profit = $profit + $profit_round; 
 
 		$count_matches = $res1->count();
 
@@ -310,7 +315,7 @@ class MatchController extends BaseController {
 	    }
 
 
-		return View::make('bsim')->with(array('data' => $res1->get(), 'round' => $nextround, 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init')));
+		return View::make('bsim')->with(array('data' => $res1->get(), 'round' => $nextround, 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'inarr' => $inarr.",".$income_round, 'prarr' => $prarr.','.$bsf));
 
 	}
 
@@ -345,7 +350,7 @@ class MatchController extends BaseController {
 	    	$played_sim->profit = $played_sim->bet*$played_sim->odds - $played_sim->bet - $played_sim->bsf;
 	    	$played_sim->save();
 	    }
-		return View::make('sim')->with(array('data' => $res->get(), 'round' => $arg, 'season' => Input::get('season'), 'count' => $count, 'income' => 0, 'profit' => 0, 'multiply' => Input::get('multiply'), 'init' => Input::get('init')));
+		return View::make('sim')->with(array('data' => $res->get(), 'round' => $arg, 'season' => Input::get('season'), 'count' => $count, 'income' => 0, 'profit' => 0, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'inarr' => '', 'prarr' => ''));
 
 	}
 
@@ -357,14 +362,16 @@ class MatchController extends BaseController {
 		$profit = Input::get('profit');
 		$mul = Input::get('multiply');
 		$bsfrow = Input::get('bsfrow');
+		$inarr = Input::get('inarr');
+		$prarr = Input::get('prarr');
 
 		$nextround = $round + 1;
 		$nextseason = $season;
-		if ($season == '2011-2012' && $round == 42) {
+		if ($season == '2011-2012' && $round == 38) {
 			$nextround = 1;
 			$nextseason = '2012-2013';
 		}
-		if ($season == '2012-2013' && $round == 42) {
+		if ($season == '2012-2013' && $round == 38) {
 			$nextround = 1;
 			$nextseason = '2013-2014';
 		}
@@ -410,8 +417,11 @@ class MatchController extends BaseController {
 	        ->orderBy('matchDate')
 	        ->orderBy('home');
 
-	    $income = $income + $res2->sum('income'); 
-	    $profit = $profit + $res2->sum('profit'); 
+	    $income_round = $res2->sum('income'); 
+	    $profit_round = $res2->sum('profit');
+
+	    $income = $income + $income_round; 
+	    $profit = $profit + $profit_round; 
 
 	    $matches = $res1->get();
 	    // return $matches;
@@ -426,7 +436,7 @@ class MatchController extends BaseController {
 
 	    $bsfrow[$round] = $bsf;
 
-		return View::make('sim')->with(array('data' => $res1->get(), 'round' => $nextround, 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init')));
+		return View::make('sim')->with(array('data' => $res1->get(), 'round' => $nextround, 'season' => $nextseason, 'count' => $count, 'income' => $income, 'profit' => $profit, 'multiply' => Input::get('multiply'), 'init' => Input::get('init'), 'inarr' => $inarr.",".$income_round, 'prarr' => $prarr.','.$bsf));
 
 	}
 

@@ -227,7 +227,7 @@
 			return;
 		}
 		getMatchOdds($row['id']);
-		//parseMatchDetails($url, $row['id'], $row['season']);
+		// parseMatchDetails($url, $row['id'], $row['season']);
 	}
 	$end = time();
 
