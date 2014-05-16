@@ -99,6 +99,18 @@ table th input:focus {
   text-align: center;
   border-bottom: none;
 }
+.simulator {
+  margin-bottom: 10px;
+}
+.simulator td {
+  width: 150px;
+}
+.simulator td .direction {
+  width: 25px;
+}
+.simulator td .length {
+  width: 129px;
+}
 .noMargin {
   margin:0px !important;
 }

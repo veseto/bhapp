@@ -17,24 +17,16 @@ Route::get('/drawstats/{country}/{league}', 'SeriesController@percentStat');
 Route::get('/drawspercent', 'SeriesController@percentDraws');
 Route::get('/roundpercent/{country}/{league}', 'SeriesController@percentDrawsPerRound');
 
-Route::get('/simulator/{country}/{league}', 'SimulatorController@getSimMatches');
-Route::post('/simulator', 'SimulatorController@newSim');
+Route::get('/simulator/{country?}/{league?}/{seasoncount?}', 'SimulatorController@getSimMatches');
+Route::post('/simulator/{country?}/{league?}/{seasoncount?}', 'SimulatorController@newSim');
+
+Route::get('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@getSimMatchesFix');
+Route::post('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@newSimFix');
 
 // Route::get('/simusa/{startdate?}/{enddate?}', 'MatchController@getSimMatchesusa')-> before('auth');
 
 // Route::post('/simusa', 'MatchController@newSimusa');
 // Route::post('/nextusa', 'MatchController@nextusa');
-
-
-Route::get('/bsim/{season?}/{round?}', 'MatchController@getSimMatches')-> before('auth');
-Route::post('/save', 'MatchController@save')-> before('auth');
-// Route::get('/simstart', 'MatchController@startSim')-> before('auth');
-Route::post('/bsim', 'MatchController@newSim');
-Route::post('/next', 'MatchController@next');
-Route::get('/sim/{season?}/{round?}', 'MatchController@getSimMatches2')-> before('auth');
-Route::get('/simstart', 'MatchController@startSim')-> before('auth');
-Route::post('/sim', 'MatchController@newSim2');
-Route::post('/next2', 'MatchController@next2');
 
 Route::get('/calculateseries/{country}', "SeriesController@calculatePPSSeries");
 Route::get('/calculateseries/{country}/{team}', "SeriesController@calculatePPSSeriesForTeam");

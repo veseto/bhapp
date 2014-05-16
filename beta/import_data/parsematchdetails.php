@@ -204,7 +204,7 @@
 		}
 	    return $odds;
 	}
-	$baseUrl = "http://www.betexplorer.com/soccer/";//poland/ekstraklasa-2010-2011/";
+	$baseUrl = "http://www.betexplorer.com/soccer/poland/ekstraklasa/";//poland/ekstraklasa-2010-2011/";
 	// $matchId = "hrhPTNlp";
 	$start = time();
 	//$q = "SELECT * from `match` left join leagueDetails on leagueDetails.leagueId=`match`.leagueId where leagueDetails.leagueId=4";
@@ -227,7 +227,7 @@
 			return;
 		}
 		getMatchOdds($row['id']);
-		// parseMatchDetails($url, $row['id'], $row['season']);
+	 	parseMatchDetails($url, $row['id'], $row['season']);
 	}
 	$end = time();
 

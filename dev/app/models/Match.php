@@ -15,7 +15,6 @@ class Match extends Eloquent {
     }
     
     public static function updateMatchDetails($match) {
-    	return $match;
     	return Match::parseMatchDetails($match);
     	
     }
@@ -26,14 +25,12 @@ class Match extends Eloquent {
 	}
 
 	private static function parseMatchDetails($match) {
-		return $match;
-		$baseUrl = "http://www.betexplorer.com/soccer/";
+		$baseUrl = "http://www.betexplorer.com/soccer/poland/ekstraklasa/";
 		$url = $baseUrl."matchdetails.php?matchid=".$match->id;
 		// echo "***  $matchId $url ***<br>";
-		return $url;
 		if(Match::get_http_response_code($url) != "200"){
-			//  "Wrong match details url! --> $url";
-			return;
+			return "Wrong match details url! --> $url";
+			
 		}
 		$data = file_get_contents($url);
 
@@ -43,18 +40,23 @@ class Match extends Eloquent {
 		$dom->preserveWhiteSpace = false;
 		$tables = $dom->getElementsByTagName('table');
 
-		$date = $tables->item(0)->getElementsByTagName('tr')->item(0)->getElementsByTagName('th')->item(1)->nodeValue;
-		$nums = explode('.', $date);
-		$strdate = $nums[2]."-".$nums[1]."-".$nums[0];
+		if ($tables->length > 0) {
+			$date = $tables->item(0)->getElementsByTagName('tr')->item(0)->getElementsByTagName('th')->item(1)->nodeValue;
+			$nums = explode('.', $date);
+			$strdate = $nums[2]."-".$nums[1]."-".$nums[0];
+			$match->matchDate = $strdate;
+		} else {
+			return $url;
+		}
 		// echo "$matchId ";
 
-		$match->matchDate = $strdate;
+		
 
 		$scoreTable = $tables->item(1);
 		$scoreRows = $scoreTable->getElementsByTagName('tr');
 		
-		$home = $mysqli->escape_string($scoreRows->item(0)->getElementsByTagName('th')->item(0)->nodeValue);
-		$away = $mysqli->escape_string($scoreRows->item(0)->getElementsByTagName('th')->item(1)->nodeValue);
+		$home = $scoreRows->item(0)->getElementsByTagName('th')->item(0)->nodeValue;
+		$away = $scoreRows->item(0)->getElementsByTagName('th')->item(1)->nodeValue;
 
 		$tmp = $scoreRows->item(1);
 		$resultShort = '-';
@@ -75,6 +77,7 @@ class Match extends Eloquent {
 			}
 			if ($tmp->getElementsByTagName('td')->length > 0) {
 				$reason = $tmp->getElementsByTagName('td')->item(0)->nodeValue;
+				$match->state = $reason;
 			}
 		}
 		$match->resultShort = $resultShort;
@@ -115,29 +118,29 @@ class Match extends Eloquent {
 			} 
 		}
 
-		$match->matchTime = $this->parseTime($matchId);
+		$match->matchTime = Match::parseTime($match->id);
 
 		$match->save();
 		if ($tables->length == 3) {
 			$class = $tables->item(2)->parentNode->getAttribute("class");
 			if ($class == 'fr') {
-				processGoals($tables->item(2), "away", $match->id);
+				Match::processGoals($tables->item(2), "away", $match->id);
 			} else if ($class = 'fl') {
-				processGoals($tables->item(2), "home", $match->id);
+				Match::processGoals($tables->item(2), "home", $match->id);
 			}
 		}
 		if ($tables->length == 4) {
 			$class = $tables->item(2)->parentNode->getAttribute("class");
 			if ($class == 'fr') {
-				processGoals($tables->item(2), "away", $match->id);
-				processGoals($tables->item(3), "home", $match->id);
+				Match::processGoals($tables->item(2), "away", $match->id);
+				Match::processGoals($tables->item(3), "home", $match->id);
 			} else if ($class = 'fl') {
-				processGoals($tables->item(2), "home", $match->id);
-				processGoals($tables->item(3), "away", $match->id);
+				Match::processGoals($tables->item(2), "home", $match->id);
+				Match::processGoals($tables->item(3), "away", $match->id);
 			}
 		}  
 
-		getMatchOdds($match->id);
+		Match::getMatchOdds($match->id);
 		return $match;
 	}
 	private static function processGoals($table, $team, $matchId) {
@@ -159,12 +162,12 @@ class Match extends Eloquent {
 		 	if (trim($minute) == '') {
 		 		$minute = 0;
 		 	}
-		 	$duplicate = Goals::where('match_id', '=', $matchid)->where('minute', '=', $minute)->where('player', '=', $player)->first();
+		 	$duplicate = Goals::where('match_id', '=', $matchId)->where('minute', '=', $minute)->where('player', '=', $player)->first();
 		 	if ($duplicate) {
 
 		 	} else {
 		 		$goal = new Goals;
-		 		$goal->match_id = $matchid;
+		 		$goal->match_id = $matchId;
 		 		$goal->minute = $minute;
 		 		$goal->player = $player;
 		 		$goal->reason = $reason;
@@ -207,7 +210,7 @@ class Match extends Eloquent {
 					    		} else {
 					    			$odds = new Odds1x2;
 					    			$odds->match_id = $matchId;
-					    			$odds->bookmaker_id = $$key;
+					    			$odds->bookmaker_id = $key;
 					    			$odds->odds1 = $odds1;
 					    			$odds->odds2 = $odds2;
 					    			$odds->oddsX = $oddsX;
@@ -222,7 +225,7 @@ class Match extends Eloquent {
 	}
 
 
-	private function parseTime($matchId) {
+	private static function parseTime($matchId) {
 		$url = "http://www.betexplorer.com/soccer/poland/ekstraklasa/piast-gliwice-slask-wroclaw/$matchId/";
 		$data = file_get_contents($url);
 

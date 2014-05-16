@@ -10,60 +10,63 @@
 @stop
 
 @section('pageHeader')
-	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => "Today's matches", 'small' => '28-Apr-14 (Mon)'))
+	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => $country.' :: '.$league, 'small' => $seasoncount.' seasons'))
 @stop
 
 @section('content')
-	<p>
-		{{Form::open(array('url' => '/simulator'))}}
 
-		{{Form::label('country', 'Country')}}
-		{{Form::text('country', $country)}}<br>
+<table class='simulator'>
+		{{Form::open(array('url' => $action."/".$country."/".$league))}}
+	<tr>
+		<td class="leading">{{Form::label('country', 'Country')}}</td>
+		<td>{{Form::text('country', $country, array('readonly'))}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('league', 'League')}}</td>
+		<td>{{Form::text('league', $league, array('readonly'))}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('seasoncount', 'Available seasons')}}</td>
+		<td>{{Form::text('seasoncount', $seasoncount, array('readonly'))}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('seasonfrom', 'From season')}}</td>
+		<td>{{Form::text('seasonfrom', $seasonfrom)}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('season', 'To season')}}</td>
+		<td>{{Form::text('season', $season)}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('count', 'Length')}}</td>
+		<td>{{Form::text('lt', $lt, array('class' => 'direction'))}}{{Form::text('count', $count, array('class' => 'length'))}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('offset', 'Starting round')}}</td>
+		<td>{{Form::text('offset', $offset)}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('bsf', 'BSF')}}</td>
+		<td>{{Form::text('bsf', $bsf)}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('multiply', 'Multiplier')}}</td>
+		<td>{{Form::text('multiply', $multiply)}}</td>
+	</tr>
+	<tr>
+		<td>{{Form::label('init', 'Initial €')}}</td>
+		<td>{{Form::text('init', $init)}} </td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>{{Form::submit('Start')}}</td>
+	</tr>
+		@if(isset($data))
+		{{Form::close()}}
+</table>
 
-		{{Form::label('league', 'League')}}
-		{{Form::text('league', $league)}}<br>
 
-		{{Form::label('season', 'season')}}
-		{{Form::text('season', $season)}}<br>
-
-		{{Form::label('count', 'length')}}
-		{{Form::text('lt', $lt)}}
-		{{Form::text('count', $count)}}<br>
-
-		{{Form::label('offset', 'offset')}}
-		{{Form::text('offset', $offset)}}<br>
-
-		{{Form::label('multiply', 'multiplier')}}
-		{{Form::text('multiply', $multiply)}}<br>
-
-		{{Form::label('init', 'Initial')}}
-		{{Form::text('init', $init)}}<br>
-
-		{{Form::submit('Start new sim')}}
-		{{Form::close()}}<br>
-	</p>
-	@if(isset($data))
 		<table id="sim">
-		
-		<tbody>
-			@foreach($data as $season=>$dd)
-				@foreach($dd as $round=>$d)
-					<tr>
-						<td>{{$season}}</td>
-						<td>{{$round}}</td>
-						<td>{{$d['bsf']}}</td>
-						<td>{{$d['adj']}}</td>
-						<td>{{$d['bet']}}</td>
-						<td>{{$d['acc']}}</td>
-						<td>{{$d['all_draws']}}/{{$d['all_matches']}}</td>
-						<td>{{$d['draws_played']}}/{{$d['all_played']}}</td>
-						<td>{{$d['income']}}</td>
-						<td>{{$d['real']}}</td>
-					</tr>
-				@endforeach
-			@endforeach
-			</tr>
-		</tbody>
 		<thead>
 			<tr>
 				<th>season</th>
@@ -78,6 +81,25 @@
 				<th>acc state</th>
 			</tr>
 		</thead>
+		<tbody>
+			@foreach($data as $season=>$dd)
+				@foreach($dd as $round=>$d)
+					<tr>
+						<td>{{$season}}</td>
+						<td>{{$round}}</td>
+						<td>{{$d['bsf']}}</td>
+						<td>{{$d['adj']}}</td>
+						<td>{{$d['bet']}}</td>
+						<td>{{$d['acc']}}</td>
+						<td>{{$d['all_draws']}} ({{$d['all_matches']}})</td>
+						<td>{{$d['draws_played']}} ({{$d['all_played']}})</td>
+						<td>{{$d['income']}}</td>
+						<td>{{$d['real']}}</td>
+					</tr>
+				@endforeach
+			@endforeach
+			</tr>
+		</tbody>
 	</table>
 
 	<script type="text/javascript">
@@ -170,5 +192,8 @@
 		} );
 	});
 	</script>
+	@endif
+	@if(isset($time)) 
+		Time elapsed: {{$time}} sec
 	@endif
 @stop
