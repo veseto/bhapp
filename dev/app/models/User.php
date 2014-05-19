@@ -8,6 +8,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	protected $fillable = array('name', 'email');
 	protected $guarded = array('id', 'password');
 
+
+	public function common_pools() {
+		return $this->hasOne('CommonPools');
+	}
+
 	/**
 	 * Get the unique identifier for the user.
 	 *

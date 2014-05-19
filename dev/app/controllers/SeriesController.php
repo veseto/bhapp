@@ -219,6 +219,7 @@ class SeriesController extends BaseController {
 	}
 
 	public function updateAllPPSSeries() {
+		$starttime = time();
 		$today = date('Y-m-d', time());
 
 		$date = strtotime($today."-1 month");
@@ -231,7 +232,7 @@ class SeriesController extends BaseController {
 				                  ->orWhere('resultShort', '=', '-');
 				        })
 					->where('state', '<>', 'Canceled')
-					// ->where('match.league_details_id', '=', 85)
+					// ->where('match.league_details_id', '=', 11)
 					//->where('active', '=', 1)
 					//->groupBy('end_match_id')
 					->get();
@@ -295,7 +296,8 @@ class SeriesController extends BaseController {
 			// 	}
 			// }
 		}
-		return $matches;
+		$endtime = time() - $starttime;
+		return $endtime." sec. for ".count($matches)." matches";
 	}
 
 	public static function getSeriesForMatches($league_details_id, $season, $game_type_id) {

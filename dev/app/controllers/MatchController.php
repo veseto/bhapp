@@ -111,6 +111,19 @@ class MatchController extends BaseController {
 		return View::make('matches')->with(array('data' => $res));
 	}
 
+	public function getNextMatchesForPlay($country, $league) {
+		$league_details_id = LeagueDetails::where('country', '=', $country)->where('fullName', '=', $league)->first(['id']);
+		$teams = Match::distinct('home')->where('league_details_id', '=', $league_details_id->id)->where('season', '=', '2013-2014')->lists('home');
+		$m = array();
+		$i = 0;
+		foreach ($teams as $team) {
+			$m[$i] = Match::getNextMatchForTeamLeague($team, $league_details_id->id)->toArray();
+			$i ++;
+		}
+		// $m = array_unique($m);
+		return View::make('temptoplay')->with(array('data' => $m));
+	}
+
 
 	// public function save() {
 	// 	$input = Input::all();

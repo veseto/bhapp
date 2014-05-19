@@ -8,6 +8,18 @@ class LeagueDetails extends Eloquent {
 
     public $timestamps = false;
 
+    public function pools(){
+
+        return $this->hasMany("Pools");
+    
+    }
+
+    public function groups(){
+
+        return $this->hasMany("Groups");
+    
+    }
+
     public function importedSeasons(){
 
     	return $this->hasMany("ImportedSeasons");
@@ -20,5 +32,6 @@ class LeagueDetails extends Eloquent {
     	
     	return $leagueDetails->id; 
     }
+
 }
 

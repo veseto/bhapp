@@ -8,6 +8,10 @@ class Match extends Eloquent {
 
     public $timestamps = false;
 
+    public function groups() {
+    	return $this->belongsTo('Groups');
+    }
+
     public static function matchesForSeason($leagueId, $season) {
 
     	return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season)->orderBy('matchDate', 'ASC')->orderBy('matchTime', 'ASC');
@@ -254,6 +258,20 @@ class Match extends Eloquent {
 			->where('matchDate', '>=', $match->matchDate)
 			->where('id', '<>', $match->id)
 			->orderBy('matchDate', 'asc')->orderBy('matchTime', 'asc')->first();
+	}
+
+	public static function getNextMatchForTeamLeague($team, $league_details_id) {
+	
+		$date = date('Y-m-d');
+
+		return Match::where(function($query) use ($team)
+            {
+                $query->where('home', '=', $team)
+                      ->orWhere('away', '=', $team);
+            })
+			->where('matchDate', '>=', $date)
+			->where('league_details_id', '=', $league_details_id)
+			->orderBy('matchDate', 'asc')->orderBy('matchTime', 'asc')->first(['home', 'away', 'matchDate']);
 	}
 }
 

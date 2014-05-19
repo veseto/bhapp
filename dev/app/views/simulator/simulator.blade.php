@@ -10,7 +10,7 @@
 @stop
 
 @section('pageHeader')
-	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => $country.' :: '.$league, 'small' => $seasoncount.' seasons'))
+	@include('layouts.partials.pageheader', array('calendar' => false, 'big' => $country.' :: '.$league, 'small' => $seasoncount.' seasons '.$time.'s'))
 @stop
 
 @section('content')
@@ -19,7 +19,7 @@
 		{{Form::open(array('url' => $action."/".$country."/".$league))}}
 	<tr>
 		<td class="leading">{{Form::label('country', 'Country')}}</td>
-		<td>{{Form::text('country', $country, array('readonly'))}}</td>
+		<td style="width: 85%;">{{Form::text('country', $country, array('readonly'))}}</td>
 	</tr>
 	<tr>
 		<td>{{Form::label('league', 'League')}}</td>
@@ -27,45 +27,53 @@
 	</tr>
 	<tr>
 		<td>{{Form::label('seasoncount', 'Available seasons')}}</td>
-		<td>{{Form::text('seasoncount', $seasoncount, array('readonly'))}}</td>
+		<td>{{Form::text('seasoncount', $seasoncount, array('readonly'))}} <abbr title="To make more seasons available add /{country}/{league}/{number} to the url. Ex: /sweden/allsvenskan/8." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('seasonfrom', 'From season')}}</td>
-		<td>{{Form::text('seasonfrom', $seasonfrom)}}</td>
+		<td>{{Form::text('seasonfrom', $seasonfrom)}} <abbr title="Season offset. Larger integer represents older year up to {Available seasons}. Ex. From season 2 to season 0 means 2011/2012 - 2012/2013 - 2013/2014." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('season', 'To season')}}</td>
-		<td>{{Form::text('season', $season)}}</td>
+		<td>{{Form::text('season', $season)}} <abbr title="Season offset. Larger integer represents older year up to {Available seasons}. Ex. From season 2 to season 0 means 2011/2012 - 2012/2013 - 2013/2014." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('count', 'Length')}}</td>
-		<td>{{Form::text('lt', $lt, array('class' => 'direction'))}}{{Form::text('count', $count, array('class' => 'length'))}}</td>
+		<td>{{Form::text('lt', $lt, array('class' => 'direction'))}}{{Form::text('count', $count, array('class' => 'length'))}} <abbr title="Type of series to play. Any series outside the selected range will be discarded. Ex. > 2 means a team will need to have at leat two matches in a row without a draw to be included." class="initialism text-muted">?</abbr>
+</td>
 	</tr>
 	<tr>
 		<td>{{Form::label('offset', 'Starting round')}}</td>
-		<td>{{Form::text('offset', $offset)}}</td>
+		<td>{{Form::text('offset', $offset)}} <abbr title="Round offset. Ex. 15 will start the simulation from round 15 of the season entered above." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('bsf', 'BSF')}}</td>
-		<td>{{Form::text('bsf', $bsf)}}</td>
+		<td>{{Form::text('bsf', $bsf)}} <abbr title="Bet so far. The amount of money а serie is worth." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('multiply', 'Multiplier')}}</td>
-		<td>{{Form::text('multiply', $multiply)}}</td>
+		<td>{{Form::text('multiply', $multiply)}} <abbr title="Multiplies BSF to represent the amount of money with which a serie becomes more expensive with each round." class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td>{{Form::label('init', 'Initial €')}}</td>
-		<td>{{Form::text('init', $init)}} </td>
+		<td>{{Form::text('init', $init)}} <abbr title="The amount of money a serie starts with. Initial worth of a serie." class="initialism text-muted">?</abbr></td>
+	</tr>
+	<tr>
+		<td>{{Form::label('auto', 'Automatic mode')}}</td>
+		<td>{{Form::checkbox('auto', 'true', true, array('class' => 'direction'))}}{{Form::text('from', $from, array('class' => 'direction'))}}{{Form::text('to', $to, array('class' => 'direction'))}} <abbr title="Automatic mode attempts to keep the number of active series between the represented numbers at all times." class="initialism text-muted">?</abbr></td>
+	</tr>
+	<tr>
+		<td>{{Form::label('rounds', 'Rounds for reset')}}</td>
+		<td>{{Form::text('rounds', $rounds)}} <abbr title="A comma separated list. The simulator will reset BSF and Bet to default values at those rounds. Ex. 11,15,22,30" class="initialism text-muted">?</abbr></td>
 	</tr>
 	<tr>
 		<td></td>
 		<td>{{Form::submit('Start')}}</td>
 	</tr>
-		@if(isset($data))
 		{{Form::close()}}
 </table>
 
-
+	@if(isset($data))
 		<table id="sim">
 		<thead>
 			<tr>
@@ -79,6 +87,8 @@
 				<th>series</th>
 				<th>income</th>
 				<th>acc state</th>
+				<th>removed bsf</th>
+				<th>filter</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -87,14 +97,20 @@
 					<tr>
 						<td>{{$season}}</td>
 						<td>{{$round}}</td>
-						<td>{{$d['bsf']}}</td>
-						<td>{{$d['adj']}}</td>
-						<td>{{$d['bet']}}</td>
-						<td>{{$d['acc']}}</td>
+						<td>{{ round($d['bsf'], 0, PHP_ROUND_HALF_UP) }}</td>
+						<td>{{ round($d['adj'], 0, PHP_ROUND_HALF_UP) }}</td>
+						<td>{{ round($d['bet'], 0, PHP_ROUND_HALF_UP) }}</td>
+						<td>{{ round($d['acc'], 0, PHP_ROUND_HALF_UP) }}</td>
 						<td>{{$d['all_draws']}} ({{$d['all_matches']}})</td>
 						<td>{{$d['draws_played']}} ({{$d['all_played']}})</td>
-						<td>{{$d['income']}}</td>
-						<td>{{$d['real']}}</td>
+						<td>{{ round($d['income'], 0, PHP_ROUND_HALF_UP) }}</td>
+						<td>{{ round($d['real'], 0, PHP_ROUND_HALF_UP) }}</td>
+						@if (isset($d['removed_bsf']))
+						<td>{{ $d['removed_bsf'] }}</td>
+						@else
+						<td>-</td>
+						@endif
+						<td>{{ $d['filter'] }}</td>
 					</tr>
 				@endforeach
 			@endforeach

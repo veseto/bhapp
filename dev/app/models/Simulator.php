@@ -9,5 +9,9 @@ class Simulator extends Eloquent {
     public $timestamps = false;
     public static $unguarded = true;
 
+    // public function match() {
+    // 	return $this->hasOne('Match');
+    // }
+
 }
 
