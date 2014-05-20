@@ -87,8 +87,10 @@
 				<th>series</th>
 				<th>income</th>
 				<th>acc state</th>
-				<th>removed bsf</th>
+				<th>cash out</th>
+				<th>profit</th>
 				<th>filter</th>
+				<th>week</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -105,12 +107,15 @@
 						<td>{{$d['draws_played']}} ({{$d['all_played']}})</td>
 						<td>{{ round($d['income'], 0, PHP_ROUND_HALF_UP) }}</td>
 						<td>{{ round($d['real'], 0, PHP_ROUND_HALF_UP) }}</td>
-						@if (isset($d['removed_bsf']))
+						<!-- @if (isset($d['removed_bsf']))
 						<td>{{ $d['removed_bsf'] }}</td>
 						@else
 						<td>-</td>
-						@endif
+						@endif -->
+						<td>{{ round($d['out'], 0, PHP_ROUND_HALF_UP) }}</td>
+						<td>{{ round($d['outminadj'], 0, PHP_ROUND_HALF_UP) }}</td>
 						<td>{{ $d['filter'] }}</td>
+						<td>{{ $d['wn'] }}</td>
 					</tr>
 				@endforeach
 			@endforeach

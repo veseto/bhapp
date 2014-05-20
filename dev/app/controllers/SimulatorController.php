@@ -99,10 +99,11 @@ class SimulatorController extends BaseController {
 
 		$bet = $init;
 		$bsf = $bsfinit;
-		$account = 0;
+		$account = -$init;
 		$income = 0;
 		$roundsArr = explode(',', $r);
 		$accountstate = 0;
+		$adjcount = 0;
 
 		$league_details_id = LeagueDetails::where('country', '=', $country)
 					->where('fullName', '=', $league)->first()->id;
@@ -131,6 +132,18 @@ class SimulatorController extends BaseController {
 
 				$result[$seasons[$i]][$j] = array();
 				
+				$cwDate = Match::join('mapping', 'mapping.round', '=', 'match.round')
+					->where('int', '=', $j)
+					->where('season', '=', $seasons[$i])
+				    ->where('league_details_id', '=', $league_details_id)
+				    ->select(['matchDate', DB::raw('count(*) as c')])
+				    ->groupBy('matchDate')
+				    ->orderBy('c', 'desc')
+				    ->first()->matchDate;
+				
+
+				$result[$seasons[$i]][$j] = array();
+				
 				$res_c = Match::join('mapping', 'mapping.round', '=', 'match.round')
 					->where('int', '=', $j)
 					->where('season', '=', $seasons[$i])
@@ -138,6 +151,7 @@ class SimulatorController extends BaseController {
 				    
 				$result[$seasons[$i]][$j]['all_matches'] = $res_c->count();
 				$result[$seasons[$i]][$j]['all_draws'] = $res_c->where('resultShort', '=', 'D')->count();
+				$result[$seasons[$i]][$j]['wn'] = date("W", strtotime($cwDate));
 
 				if (isset($auto) && $auto == "true") {
 					for ($t = 0; $t < 100; $t++) {
@@ -206,7 +220,6 @@ class SimulatorController extends BaseController {
 				    	$simulator->save();
 					}
 
-					$account = $accountstate - $bet;
 
 					$draws = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
 						->join('mapping', 'mapping.round', '=', 'match.round')
@@ -238,14 +251,16 @@ class SimulatorController extends BaseController {
 					} else {
 						$adj = 0;
 					}
-					$result[$seasons[$i]][$j]['acc'] = $account;
-					$result[$seasons[$i]][$j]['adj'] = $adj;
-					$result[$seasons[$i]][$j]['real'] = $account + $income;
-
+					// $account = $accountstate - $bet;
 
 					$accountstate = $account + $income;
 
-					$account = $account - $bet + $income;
+					$result[$seasons[$i]][$j]['acc'] = $account;
+					$result[$seasons[$i]][$j]['adj'] = $adj;
+					$adjcount = $adjcount + $adj;
+
+
+
 
 
 					$try = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
@@ -267,14 +282,22 @@ class SimulatorController extends BaseController {
 				    	$bsf = $init;
 				    }
 					$bet = $bsf*$mul;
+					$result[$seasons[$i]][$j]['outminadj'] = $accountstate - $adjcount;
 
 					if (in_array($j, $roundsArr)) {
 						$bet = $init;
 						$result[$seasons[$i]][$j]['removed_bsf'] = $bsf;
+						$result[$seasons[$i]][$j]['out'] = $accountstate;
+						$result[$seasons[$i]][$j]['real'] = 0;
+						$adjcount = 0;
+						$account = -$init;
 						$bsf = 0;
 						// return $bsf;
 					} else {
+						$result[$seasons[$i]][$j]['out'] = 0;
 						$result[$seasons[$i]][$j]['removed_bsf'] = 0;
+						$result[$seasons[$i]][$j]['real'] = $accountstate;
+						$account = $account - $bet + $income;
 					}
 
 					// return View::make('simulator.simulator')->with(array('data' => $res->get(), 'country' => $country, 'league' => $league, 'count' => $count, 'init' => $init, 'multiply' => $mul, 'offset' => $roundoffset, 'season' => $seasonoffset, 'lt' => $lt));
@@ -287,7 +310,9 @@ class SimulatorController extends BaseController {
 					$result[$seasons[$i]][$j]['real'] = $account + $income;
 					$result[$seasons[$i]][$j]['all_played'] = 0;
 					$result[$seasons[$i]][$j]['draws_played'] = 0;
-
+					$result[$seasons[$i]][$j]['out'] = 0;
+					$result[$seasons[$i]][$j]['removed_bsf'] = 0;
+					$result[$seasons[$i]][$j]['outminadj'] = 0;
 				}
 
 			}

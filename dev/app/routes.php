@@ -14,7 +14,8 @@
 //stats
 Route::get('/boo', function(){
 	$date = date('Y-m-d');
-	return Groups::where('enddate', '<', $date)->get();
+	// return Parser::parseMatchesForGroup(Groups::find(2));
+	return Groups::with('matches')->get();
 });
 
 Route::get('/nextmatches/{country}/{league}', 'MatchController@getNextMatchesForPlay');

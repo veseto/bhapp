@@ -7,6 +7,8 @@ class Match extends Eloquent {
     protected $table = 'match';
 
     public $timestamps = false;
+    
+    public static $unguarded = true;
 
     public function groups() {
     	return $this->belongsTo('Groups');
