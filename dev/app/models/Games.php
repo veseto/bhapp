@@ -15,8 +15,7 @@ class Games extends Eloquent {
     }
     
     public static function recalculate($groups_id, $multiplier, $amount, $user_id) {
-    	$ids = Groups::find($groups_id)->matches;
-    	return $ids;
+    	$ids = Groups::find($groups_id)->matches()->lists('id');
 		$games = Games::whereIn('match_id', $ids)->where('user_id', '=', $user_id)->get();
 		$bsfpm = $amount / count($games);
 		$bpm = $amount * $multiplier / count($games);
@@ -125,6 +124,40 @@ class Games extends Eloquent {
 		}
 	}
 
+	public static function getMatchOddsForGame($game) {
+		// return "boo";
+		$matchId = $game->match_id;
+		// return $matchId;
+		$bookmaker = Bookmaker::find($game->bookmaker_id);
+		$url = "http://www.betexplorer.com/gres/ajax-matchodds.php?t=n&e=$matchId&b=1x2";
+		$data = json_decode(file_get_contents($url))->odds;
+		$dom = new domDocument;
+
+		@$dom->loadHTML($data);
+		$dom->preserveWhiteSpace = false;
+		$table = $dom->getElementById ('sortable-1');
+		if ($table != null) {
+			$rows = $table->getElementsByTagName('tr');
+			for ($i = 0; $i < $rows->length; $i ++){
+				$row = $rows->item($i);
+				$cols = $row->getElementsByTagName('td');
+			    if ($cols->length > 3) {
+				    $oddsX = $cols->item(2)->getAttribute("data-odd");
+				   	// return $oddsX;
+				   // $odds3 = $cols->item(3)->getAttribute("data-odd");
+					$h = $row->getElementsByTagName('th');
+					foreach ($h as $h1) {
+					 	// echo $b[0]." ".$h1->nodeValue;
+				    	if (strpos($h1->nodeValue, $bookmaker->bookmakerName)) {
+				    		$game->odds = $oddsX;
+				    		$game->save();
+				    	}
+					}	
+				}
+		    }
+		}
+		// return Redirect::back();
+	}
 
 }
 

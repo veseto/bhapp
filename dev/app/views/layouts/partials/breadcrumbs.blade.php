@@ -6,6 +6,9 @@
 	<li class="active">{{array_get($elements, 'active')}}</li>
 	</ol>
 	<div class="pull-right">
+		@if(isset($group))
+		<a href="/group/{{$group}}/odds">refresh odds</a> |
+		@endif
 		<span>{{ Auth::user()->name }} | <a href="/settings">settings</a> | <a href="/logout">log out</a></span>
 	</div>
 </div>

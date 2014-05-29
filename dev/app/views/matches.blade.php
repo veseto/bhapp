@@ -15,7 +15,7 @@
 @stop
 
 @section('content')
-	{{ Form::open(array('url' => '/pools/get')) }}
+	<!-- {{ Form::open(array('url' => '/pools/get')) }}
 	    
 	{{ Form::label('amount', 'Amount') }}
 	{{ Form::text('amount') }}
@@ -24,12 +24,8 @@
 	
 	{{ Form::submit('get') }}
 
-
 	{{ Form::close() }}
-
-	BSF: {{$pool->amount}} <br>
-	Income: {{$pool->income}}
-
+ -->
 	<table id="matches">
 		<thead>
 			<tr>
@@ -40,6 +36,9 @@
 				<th><input type="text" name="search_engine" class="search_init" placeholder="res"></th>
 				<th><input type="hidden"></th>
 				<th><input type="text" name="search_engine" class="search_init" placeholder="game"></th>
+				<th><input type="text" name="search_engine" class="search_init" placeholder="bookmaker"></th>
+				<th><input type="hidden"></th>
+				<th><input type="hidden"></th>
 				<th><input type="hidden"></th>
 				<th><input type="hidden"></th>
 				<th><input type="hidden"></th>
@@ -53,15 +52,18 @@
 				<th>result</th>
 				<th>length</th>
 				<th>game</th>
+				<th>bookmaker</th>
 				<th>bsf</th>
 				<th>bet</th>
 				<th>odds</th>
 				<th>income</th>
+				<th></th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach($data as $d)
-				<tr class="{{$d->match_id}}">
+				<tr class="{{$d->match_id}}" id="{{$d->games_id}}">
 					<td>{{$d->matchDate}}</td>
 					<td>{{$d->matchTime}}</td>
 					<td>
@@ -80,12 +82,14 @@
 					</td>
 					<td>{{$d->resultShort}}</td>
 					<td>{{$d->streak}}</td>
-					<td>{{$d->type}}</td>
+					<td class='editabledd warning'>{{$d->type}}</td>
+					<td class='editabledd warning'>{{$d->bookmakerName}}</td>
 					<td class='editable warning'>{{$d->bsf}}</td>
 					<td class='editable warning'>{{$d->bet}}</td>
 					<td class='editable warning'>{{$d->odds}}</td>
 					<td>{{$d->income}}</td>
-
+					<td><a href="/clone/{{$d->games_id}}"> clone </a></td>
+					<td><a href="/delete/{{$d->games_id}}"> delete </a></td>
 				</tr>
 			@endforeach
 		</tbody>
@@ -116,7 +120,7 @@
 			var id="."+firstClass;
 			//alert(id);
 			if ($(id).length > 1) {
-				$(id+">td").addClass("text-danger");
+				$(id+">td").addClass("text-primary");
 			}
 			//$(id).attr("style", "color: red");
 			//$( this ).append( $( "<span> ***</span>" ) );
@@ -127,7 +131,7 @@
 
 			var id="."+firstClass;
 			//alert(id);
-			$(id+">td").removeClass("text-danger");
+			$(id+">td").removeClass("text-primary");
 			//$(id).addClass("test");			
 		}
 	);
@@ -135,6 +139,7 @@
 	var asInitVals = new Array();
 
 	$(document).ready(function(){
+
 		var oTable = $("#matches").dataTable({
 	    	    "iDisplayLength": 100,
 	    	    "bJQueryUI": true,
@@ -170,20 +175,22 @@
 		} );
 
 		/* Apply the jEditable handlers to the table */
-		    oTable.$('td.editable').editable( '#', {
+		    oTable.$('td.editable').editable( '/save', {
 	        "callback": function( sValue, y ) {
-	           //	alert(y[0]);
 	            var aPos = oTable.fnGetPosition( this );
 	            var arr = sValue.split("#");
-
-	            oTable.fnUpdate( arr[0], aPos[0], 9 );
-	           	oTable.fnUpdate( arr[1], aPos[0], 10 );
-	            oTable.fnUpdate( arr[2], aPos[0], 11 );
-	            oTable.fnUpdate( arr[3], aPos[0], 12 );
-	            oTable.fnUpdate( arr[4], aPos[0], 8 );
-	    
-	            //oTable.fnClearTable();
-            	//oTable.fnReloadAjax() ;
+	            oTable.fnUpdate( arr[0], aPos[0], 8 );
+	           	oTable.fnUpdate( arr[1], aPos[0], 9 );
+	            oTable.fnUpdate( arr[2], aPos[0], 10 );
+	            oTable.fnUpdate( arr[3], aPos[0], 11 );
+	            if (arr[4] != "") {
+	            	if (arr[4] != $("#pool").text()) {
+	            		$("#crr").html("<strong>"+arr[4]+"</strong>");
+	            	} else {
+	            		$("#crr").html(arr[4]);
+	            	}
+	            	
+	            }
 	        },
 	        "submitdata": function ( value, settings ) {
 	            return {
@@ -194,6 +201,29 @@
 	        "height": "25px",
 	        "width": "40px"
 	    } );
+
+	    oTable.$('td.editabledd').editable( '#', {
+	        "callback": function( sValue, y ) {
+	            var aPos = oTable.fnGetPosition( this );
+	            var arr = sValue.split("#");
+	            
+	            //oTable.fnUpdate( arr[0], aPos[0], 7 );
+	        },
+	        "submitdata": function ( value, settings ) {
+	            return {
+	                "row_id": this.parentNode.getAttribute('id'),
+	                "column": oTable.fnGetPosition( this )[2]
+	            };
+	        },
+	        "height": "25px",
+	        "width": "40px"
+	    } );
+
+		if ($("#crr").text() != $("#pool").text()) {
+    		$("#crr").html("<strong>"+$("#crr").text()+"</strong>");
+    	} else {
+    		$("#crr").html(arr[4]);
+    	}
 
 	});
 	</script>

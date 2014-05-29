@@ -10,12 +10,19 @@ class PoolsController extends \BaseController {
 		$common->save();
 		$pool = User::find(Auth::user()->id)->pools()->where('league_details_id', '=', $league_details_id)->first();
 		$pool->amount = $pool->amount + $amount;
+		$pool->current = $pool->amount;
 		$pool->save();
 
 		$settings = Settings::where('user_id', '=', Auth::user()->id)->where('league_details_id', '=', $league_details_id)->first();
 
-		Games::recalculate($league_details_id, $settings->multiplier, $pool->amount);
+		$gr = Groups::where('league_details_id', '=', $league_details_id)->where('state', '=', 2)->get(['id'])[0]->id;
+
+		Updater::recalculateGroup($gr, Auth::user()->id);
 
 		return Redirect::back();
+	}
+
+	public function managePools(){
+		return View::make('poolmanagement');
 	}
 }

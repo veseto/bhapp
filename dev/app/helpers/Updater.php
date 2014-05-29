@@ -8,17 +8,20 @@ class Updater {
 		foreach ($allMatches as $match) {
 			$match = Updater::updateDetails($match);
 			try {
-				$games = Updater::getAllSpecialGamesForMatch($match->id);
+				$match->id;
 			} catch (ErrorException $e) {
 				continue;
 			}
-			foreach ($games as $game) {
-				return Updater::updatePool($game, $match->resultShort);
-				Updater::recalculateGroup($match->groups_id, $game->user_id);
-			}
-			if (Updater::isLastGameInGroup($match)) {
+			if ($match->groups_id != 0) {
+				$games = Updater::getAllSpecialGamesForMatch($match->id);
+				foreach ($games as $game) {
+					return Updater::updatePool($game, $match->resultShort);
+					Updater::recalculateGroup($match->groups_id, $game->user_id);
+				}
+				if (Updater::isLastGameInGroup($match)) {
 
-				return Updater::updateGroup($match->groups_id);
+					return Updater::updateGroup($match->groups_id);
+				}
 			}
 		}
 		return (time() - $time)." sec for ".count($allMatches)." matches";
@@ -33,6 +36,7 @@ class Updater {
 			}
 		}
 		$gr = Groups::find($groups_id);
+		print_r($gr);
 		$current = Groups::firstOrCreate(['league_details_id' => $gr->league_details_id, 'state' => 3, 'round' => ($gr->round + 1)]);
 		$gr->state = 1;
 		$gr->save();
@@ -58,26 +62,27 @@ class Updater {
 	}
 
 	public static function getAllMatchesForUpdate() {
-		// date_default_timezone_set('Europe/Sofia');
-		// $now = date('Y-m-d H:i:s');
-		// $start = explode(' ', date( "Y-m-d H:i:s", strtotime( "$now - 2 hours" )));
-		// return Match::where(function($q) use ($start) {
-		// 		$q->where('matchDate', '<', $start[0])
-		// 			->orWhere(function($query) use ($start)
-		// 	            {
-		// 	                $query->where('matchDate', '=', $start[0])
-		// 	                      ->where('matchTime', '<=', $start[1]);
-		// 	            });
-		// 		})
-		// 		->where(function($query) {
-		//                 $query->where('resultShort', '=', '')
-		//                       ->orWhere('resultShort', '=', '-');
-		//             })
-		// 		->where('state', '<>', 'canceled')
-		// 		->orderBy('matchDate')
-		// 		->orderBy('matchTime')
-		// 		->get();
-		return Groups::find(6)->matches;
+		date_default_timezone_set('Europe/Sofia');
+		$now = date('Y-m-d H:i:s');
+		$start = explode(' ', date( "Y-m-d H:i:s", strtotime( "$now - 2 hours" )));
+		return Match::where(function($q) use ($start) {
+				$q->where('matchDate', '<', $start[0])
+					->orWhere(function($query) use ($start)
+			            {
+			                $query->where('matchDate', '=', $start[0])
+			                      ->where('matchTime', '<=', $start[1]);
+			            });
+				})
+				->where(function($query) {
+		                $query->where('resultShort', '=', '')
+		                      ->orWhere('resultShort', '=', '-');
+		            })
+				->where('state', '<>', 'canceled')
+				->where('state', '<>', 'Awarded')
+				->orderBy('matchDate')
+				->orderBy('matchTime')
+				->get();
+		// return Groups::find(2)->matches;
 	}
 
 	public static function updateDetails($match) {
@@ -158,7 +163,7 @@ class Updater {
 				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
 				$game->bet = $bpm;
 				$game->bsf = $bsfpm;
-				$game->odds = 3;
+				// $game->odds = 3;
 				$game->income = $game->odds * $game->bet;
 				$game->save();
 			} else if (count($match) > 1) {
@@ -166,7 +171,7 @@ class Updater {
 				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
 				$game->bet = $bpm;
 				$game->bsf = $bsfpm;
-				$game->odds = 3;
+				// $game->odds = 3;
 				$game->special = 1;
 				$game->income = $game->odds * $game->bet;
 				$game->save();

@@ -55,13 +55,19 @@ Route::get('/boo', function(){
 	// foreach ($matches as $m) {
 	// 	Updater::updateDetails($m);
 	// }
+	// return Parser::parseLeagueSeries(Groups::find(6));
+	// return Updater::recalculateGroup(6,1);
 	return Updater::update();
 });
-// Route::get('/boo', function(){
-// 	Parser::parseLeagueSeries(Groups::find(6));
-// });
+Route::get('/poolmanagement', "PoolsController@managePools");
+Route::get('/ppm', "PPMController@display");
+Route::get('/livescore', "LivescoreController@livescore");
 Route::post('/pools/get', 'PoolsController@getFromMain');
 Route::get('/group/{id}', 'GroupController@getGamesForGroup');
+Route::get('/group/{groups_id}/odds', 'GamesController@getMatchOddsForGames');
+Route::post('/save', 'GamesController@saveTable');
+Route::get('/clone/{game_id}', 'GamesController@cloneMatch');
+Route::get('/delete/{game_id}', 'GamesController@removeMatch');
 
 
 Route::get('/nextmatches/{country}/{league}', 'MatchController@getNextMatchesForPlay');
@@ -91,11 +97,6 @@ Route::get('logout', 'SessionsController@destroy');
 Route::resource('sessions', 'SessionsController', ['only'  => ['create', 'store', 'destroy']]);
 
 Route::get('/settings', 'SettingsController@display');
-
-Route::post('/settings/enable', "SettingsController@createEdit");
-
-Route::post('/settings/disable', "SettingsController@deleteIgnore");
-
 
 Route::get('/home/{from?}/{to?}', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
 Route::get('/', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
