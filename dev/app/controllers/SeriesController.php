@@ -225,77 +225,121 @@ class SeriesController extends BaseController {
 		$date = strtotime($today."-1 month");
 		$start = date('Y-m-d', $date);
 
-		$matches = Match::where('matchDate', '<', $today)
-					// ->where('matchDate', '>=', $start)
-					->where(function($query) {
-				            $query->where('resultShort', '=', '')
-				                  ->orWhere('resultShort', '=', '-');
-				        })
-					->where('state', '<>', 'Canceled')
-					// ->where('match.league_details_id', '=', 11)
-					//->where('active', '=', 1)
-					//->groupBy('end_match_id')
-					->get();
-		// return count($matches);
-		foreach ($matches as $match) {
+		$series = Series::join('match', 'match.id', '=', 'series.end_match_id')
+			->where('matchDate', '<', $today)
+			->where('matchDate', '>=', $start)
+			->get();
+		foreach ($series as $serie) {
+			$next = Match::getNextMatchForTeam($serie->team, $serie);
+			if ($next != NULL) {
+				$serie->current_length = $serie->current_length + 1;
+				$serie->end_match_id = $next->id;
+				$next_id = $next->id;
+				if ($this->endSeries($serie, $serie->game_type_id)) {
+					$serie->active = 0;
+					$duplicate = Series::where('start_match_id', '=', $serie->start_match_id)
+					->where('end_match_id', '=', $serie->end_match_id)
+					->where('team', '=', $serie->team)
+					->where('current_length', '=', $serie->current_length)
+					->where('game_type_id', '=', $serie->game_type_id)->first();
+					if ($duplicate) {
+						$duplicate->delete();
+					}
+					$serie->save();
+					$s = new Series;
+					$s->team = $serie->team;
+					$s->game_type_id = $serie->game_type_id;
+					$s->current_length = 1;
+					$s->start_match_id = $next_id;
+					$s->end_match_id = $next_id;
+					$s->active = 1;
+					$s->save();
 
-			$match = Match::updateMatchDetails($match);
-			// return $match;
-			// for ($i = 0; $i < 5; $i ++) {
-			// 	$seriesArr = Series::where('end_match_id', '=', $match->id)->where('game_type_id', '=', $i)->where('active', '=', 1)->get();
-			// 	foreach ($seriesArr as $series) {
-		
-			// 	// if ($seriesArr == NULL) {
-			// 		// break 1;
-			// 		// $series1 = new Series;
-			// 		// $series1->team = $match->home;
-			// 		// $series1->game_type_id = $i;
-			// 		// $series1->current_length = 0;
-			// 		// $series1->start_match_id = $match->id;
-			// 		// $series1->active = 1;
-			// 		// $series1->save();
-			// 		// $series2 = new Series;
-			// 		// $series2->team = $match->away;
-			// 		// $series2->game_type_id = $i;
-			// 		// $series2->current_length = 0;
-			// 		// $series2->start_match_id = $match->id;
-			// 		// $series2->active = 1;
-			// 		// $series2->save();
-			// 		// $seriesArr = array($series1, $series2 );
-			// 	// }
-
-			// 	// foreach ($seriesArr as $series) {
-					
-			// 		$series->current_length = $series->current_length + 1;
-			// 		$series->end_match_id = $match->id;
-			// 		$next_id = Match::getNextMatchForTeam($series->team, $match)->id;
-			// 		if ($this->endSeries($match, $i)) {
-			// 			$series->active = 0;
-			// 			$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
-			// 			->where('end_match_id', '=', $series->end_match_id)
-			// 			->where('team', '=', $series->team)
-			// 			->where('current_length', '=', $series->current_length)
-			// 			->where('game_type_id', '=', $series->game_type_id)->first();
-			// 			if ($duplicate) {
-			// 				$duplicate->delete();
-			// 			}
-			// 			$series->save();
-			// 			$series = new Series;
-			// 			$series->team = $match->team;
-			// 			$series->game_type_id = $i;
-			// 			$series->current_length = 0;
-			// 			$series->start_match_id = $next_id;
-			// 			$series->end_match_id = $next_id;
-			// 			$series->active = 1;
-			// 			$series->save();
-
-			// 		} else {
-			// 			$series->end_match_id = $next_id;
-			// 			$series->save();
-			// 		}
-			// 	}
-			// }
+				} else {
+					$serie->end_match_id = $next_id;
+					$serie->save();
+				}
+			}
 		}
+
+		// $matches = Match::where('matchDate', '<', $today)
+		// 			->where('matchDate', '>=', $start)
+		// 			->where(function($query) {
+		// 		            $query->where('resultShort', '=', '')
+		// 		                  ->orWhere('resultShort', '=', '-');
+		// 		        })
+		// 			->where('state', '<>', 'Canceled')
+		// 			// ->where('match.league_details_id', '=', 11)
+		// 			//->where('active', '=', 1)
+		// 			//->groupBy('end_match_id')
+		// 			->get();
+		// // return count($matches);
+		// foreach ($matches as $match) {
+
+		// 	$match = Match::updateMatchDetails($match);
+		// 	// return $match;
+		// 	for ($i = 0; $i < 5; $i ++) {
+		// 		try {
+		// 			$seriesArr = Series::where('end_match_id', '=', $match->id)->where('game_type_id', '=', $i)->where('active', '=', 1)->get();
+		// 		} catch(ErrorException $e) {
+		// 			break 1;
+		// 		}
+		// 		foreach ($seriesArr as $series) {
+		
+		// 		// if ($seriesArr == NULL) {
+		// 			// break 1;
+		// 			// $series1 = new Series;
+		// 			// $series1->team = $match->home;
+		// 			// $series1->game_type_id = $i;
+		// 			// $series1->current_length = 0;
+		// 			// $series1->start_match_id = $match->id;
+		// 			// $series1->active = 1;
+		// 			// $series1->save();
+		// 			// $series2 = new Series;
+		// 			// $series2->team = $match->away;
+		// 			// $series2->game_type_id = $i;
+		// 			// $series2->current_length = 0;
+		// 			// $series2->start_match_id = $match->id;
+		// 			// $series2->active = 1;
+		// 			// $series2->save();
+		// 			// $seriesArr = array($series1, $series2 );
+		// 		// }
+
+		// 		// foreach ($seriesArr as $series) {
+					
+		// 			$series->current_length = $series->current_length + 1;
+		// 			$series->end_match_id = $match->id;
+		// 			$next = Match::getNextMatchForTeam($series->team, $match);
+		// 			if ($next != NULL) {
+		// 				$next_id = $next->id;
+		// 				if ($this->endSeries($match, $i)) {
+		// 					$series->active = 0;
+		// 					$duplicate = Series::where('start_match_id', '=', $series->start_match_id)
+		// 					->where('end_match_id', '=', $series->end_match_id)
+		// 					->where('team', '=', $series->team)
+		// 					->where('current_length', '=', $series->current_length)
+		// 					->where('game_type_id', '=', $series->game_type_id)->first();
+		// 					if ($duplicate) {
+		// 						$duplicate->delete();
+		// 					}
+		// 					$series->save();
+		// 					$s = new Series;
+		// 					$s->team = $series->team;
+		// 					$s->game_type_id = $i;
+		// 					$s->current_length = 1;
+		// 					$s->start_match_id = $next_id;
+		// 					$s->end_match_id = $next_id;
+		// 					$s->active = 1;
+		// 					$s->save();
+
+		// 				} else {
+		// 					$series->end_match_id = $next_id;
+		// 					$series->save();
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 		$endtime = time() - $starttime;
 		return $endtime." sec. for ".count($matches)." matches";
 	}

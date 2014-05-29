@@ -5,6 +5,7 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 
 class Groups extends Eloquent {
     protected $table = 'groups';
+    public static $unguarded = true;
 
     public function matches() {
     	return $this->hasMany("Match");

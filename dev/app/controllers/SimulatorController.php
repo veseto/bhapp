@@ -82,6 +82,7 @@ class SimulatorController extends BaseController {
 		$seasoncount = Input::get('seasoncount');
 
 		$auto = Input::get('auto');
+		// return $auto;
 		$country = Input::get('country');
 		$league = Input::get('league');
 		$count = Input::get('count');
@@ -139,8 +140,12 @@ class SimulatorController extends BaseController {
 				    ->select(['matchDate', DB::raw('count(*) as c')])
 				    ->groupBy('matchDate')
 				    ->orderBy('c', 'desc')
-				    ->first()->matchDate;
-				
+				    ->first();
+				if($cwDate) {
+					$cwDate = $cwDate->matchDate;
+				} else {
+					$cwDate = '2000-01-01';
+				}
 
 				$result[$seasons[$i]][$j] = array();
 				
@@ -191,6 +196,7 @@ class SimulatorController extends BaseController {
 						} 
 					}
 				} else {
+					// return $count;
 					$res = Match::join('simulator', 'simulator.match_id', '=', 'match.id')
 		        	->join('mapping', 'mapping.round', '=', 'match.round')
 					->where('int', '=', $j)

@@ -2,11 +2,41 @@
 
 class Parser {
 
-	public static function hello() {
-		return "hello";
-	}
+	
 
-	public static function parseMatchesForGroup($group) {
+    public static function parseLeagueSeries($group){
+        $baseUrl = "http://www.betexplorer.com/soccer/";
+        $league = LeagueDetails::findOrFail($group->league_details_id);
+        $url = $baseUrl.$league->country."/".$league->fullName."/";
+
+        if(Parser::get_http_response_code($url) != "200"){
+            return "Wrong league stats url! --> $url";
+        }
+        $data = file_get_contents($url);
+
+        $dom = new domDocument;
+
+        @$dom->loadHTML($data);
+        $dom->preserveWhiteSpace = false;
+
+        $finder = new DomXPath($dom);
+        $classname="stats-table result-table";
+        $nodes = $finder->query("//*[contains(@class, '$classname')]");
+        $rows = $nodes->item(4)->getElementsByTagName('tbody')->item(0)->getElementsByTagName("tr");
+        foreach ($rows as $row) {
+            $cols = $row->getElementsByTagName('td');
+            $place = $cols->item(0)->nodeValue;
+            $team = $cols->item(1)->nodeValue;
+            $streak = $cols->item(6)->nodeValue;
+            $stand = Standings::firstOrNew(['league_details_id' => $group->league_details_id, 'team' => $team]);
+            $stand->streak = $streak;
+            $stand->place = explode(".", $place)[0];
+            $stand->save();
+        }
+
+    }
+
+    public static function parseMatchesForGroup($group) {
 		$baseUrl = "http://www.betexplorer.com/soccer/";
 		$tail = "fixtures/";
 
@@ -14,7 +44,7 @@ class Parser {
 		$url = $baseUrl.$league->country."/".$league->fullName."/".$tail;
 
 		if(Parser::get_http_response_code($url) != "200"){
-			return "Wrong match details url! --> $url";
+			return "Wrong fixtures url! --> $url";
 		}
 		$data = file_get_contents($url);
 
@@ -67,9 +97,14 @@ class Parser {
                 $match->groups_id = $group->id;
                 $match->save();
 
-                // $match
+                // return $match;
             }
     	}
+        $datetime = $group->matches()->orderBy('matchDate', 'desc')->orderBy('matchTime', 'desc')->take(1)->get(['matchDate', 'matchTime'])[0];
+        // return $datetime;
+        $group->update_time = date('Y-M-d H:i:s', strtotime("$datetime->matchDate.' '.$datetime->matchTime + 2 hours"));
+        // return $group->update_time;
+        $group->save();
     }
 
 	private static function get_http_response_code($url) {

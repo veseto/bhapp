@@ -15,98 +15,31 @@
 @stop
 
 @section('content')
-	{{ Form::open(array('url' => '/pools/get')) }}
-	    
-	{{ Form::label('amount', 'Amount') }}
-	{{ Form::text('amount') }}
-
-	{{ Form::hidden('league', $league_details_id) }}
-	
-	{{ Form::submit('get') }}
-
-
-	{{ Form::close() }}
-
-	BSF: {{$pool->amount}} <br>
-	Income: {{$pool->income}}
-
 	<table id="matches">
 		<thead>
 			<tr>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="date"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="time"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="home"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="away"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="res"></th>
-				<th><input type="hidden"></th>
-				<th><input type="text" name="search_engine" class="search_init" placeholder="game"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
-				<th><input type="hidden"></th>
+				<th><input type="text" name="search_engine" class="search_init" placeholder="country"></th>
+				<th><input type="text" name="search_engine" class="search_init" placeholder="league"></th>
 				<th><input type="hidden"></th>
 			</tr>
 			<tr>
-				<th>date</th>
-				<th>time</th>
-				<th>home</th>
-				<th>away</th>
-				<th>result</th>
-				<th>length</th>
-				<th>game</th>
-				<th>bsf</th>
-				<th>bet</th>
-				<th>odds</th>
-				<th>income</th>
+				<th>country</th>
+				<th>league</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach($data as $d)
 				<tr class="{{$d->match_id}}">
-					<td>{{$d->matchDate}}</td>
-					<td>{{$d->matchTime}}</td>
-					<td>
-						@if ($d->team == $d->home)
-							<strong>{{$d->home}}</strong>
-						@else
-							{{$d->home}}
-						@endif
-					</td>
-					<td>
-						@if ($d->team == $d->away)
-							<strong>{{$d->away}}</strong>
-						@else
-							{{$d->away}}
-						@endif
-					</td>
-					<td>{{$d->resultShort}}</td>
-					<td>{{$d->streak}}</td>
-					<td>{{$d->type}}</td>
-					<td class='editable warning'>{{$d->bsf}}</td>
-					<td class='editable warning'>{{$d->bet}}</td>
-					<td class='editable warning'>{{$d->odds}}</td>
-					<td>{{$d->income}}</td>
-
+					<td>{{$d->country}}</td>
+					<td>{{$d->fullName}}</td>
+					<td><a href="/group/{{$d->id}}">GO</a></td>
 				</tr>
 			@endforeach
 		</tbody>
 	</table>
 	<script type="text/javascript">
-	// $('#get_from_pool').on("click", function(){
-	// 	var a = $('#amount').val();
-	// 	$.post("/pools/get",
- //            {
- //                // "_token": $( this ).find( 'input[name=_token]' ).val(),
- //                "league": $(this).parent().parent().attr("id"),
- //                "game": $(this).parent().attr("id"),
- //            },
- //            function( data ) {
- //                alert(data)
- //                //do something with data/response returned by server
- //            },
- //            'json'
- //        );
-	// });
-
+	
 	$( "tbody>tr" ).hover(
 		function() {
 			var claz = $(this).attr('class');
@@ -194,7 +127,6 @@
 	        "height": "25px",
 	        "width": "40px"
 	    } );
-
 	});
 	</script>
 @stop

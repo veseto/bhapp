@@ -13,6 +13,14 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->hasOne('CommonPools');
 	}
 
+	public function pools() {
+		return $this->hasMany('Pools');
+	}
+
+	public function games() {
+		return $this->hasMany('Games');
+	}
+
 	/**
 	 * Get the unique identifier for the user.
 	 *

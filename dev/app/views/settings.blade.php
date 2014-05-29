@@ -61,17 +61,13 @@
 							  </td>
 							</tr>
 							  @foreach($leagues as $name=>$s)
-							<tr id="{{$s[0]}}">
+							<tr>
 							  <td>
 							  	{{ $name }}
 							  </td>
 							  @for($j = 1; $j < 5; $j ++)
 								  <td id="{{$j}}">
-								  		@if($s[$j] != NULL && $s[$j]->ignore != 1)
-					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $s[$j]->min_start }}">
-					  			  	    @else 
-					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
-					  			  	    @endif
+				  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
 								  </td>
 							  @endfor
 							</tr>
@@ -125,17 +121,13 @@
 							
 							@foreach($ppm as $country=>$settings)
 
-							<tr id="{{ $settings[0] }}">
+							<tr>
 							  <td>
 							  	{{ $country }}
 							  </td>
 							  @for($j = 5; $j < 9; $j ++)
 								  <td id="{{$j}}">
-								  		@if($settings[$j] != NULL && $settings[$j]->ignore != 1)
-					  			  	      	<input class="activate_league_for_play" type="checkbox" checked> at <input class="min_start" type="text" style="height: 20px;width: 25px;" value="{{ $settings[$j]->min_start }}">
-					  			  	    @else 
-					  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
-					  			  	    @endif
+				  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
 								  </td>
 							  @endfor
 							</tr>
@@ -215,53 +207,53 @@
 </div>
 <!-- js for tabs -->
 <script type="text/javascript">
-	$(".activate_league_for_play").change(function(){
-		//$(this).siblings("input").prop('disabled', function (_, val) { return ! val; });
-		if (this.checked) {
-			// alert("boo");
-			 $(this).siblings("input").prop("disabled", false);
-			// var url = "/settings/"+$(this).parent().parent().attr("id")+"/"+$(this).parent().attr("id")+"/"+$(this).siblings("input").val()+"/enable";
-			// alert(url);
-			// $.post("/settings/enable",
-	  //           {
-	  //               "league": $(this).parent().parent().attr("id"),
-	  //               "game": $(this).parent().attr("id"),
-	  //               "min": $(this).siblings("input").val()
-	  //           },
-	  //           function( data ) {
-	  //               //do something with data/response returned by server
-	  //           },
-	  //           'json'
-	  //       );
-		} else {
-			$.post("/settings/disable",
-	            {
-	                // "_token": $( this ).find( 'input[name=_token]' ).val(),
-	                "league": $(this).parent().parent().attr("id"),
-	                "game": $(this).parent().attr("id"),
-	            },
-	            function( data ) {
-	                //do something with data/response returned by server
-	            },
-	            'json'
-	        );
-	        $(this).siblings("input").prop("disabled", true);               
+	// $(".activate_league_for_play").change(function(){
+	// 	//$(this).siblings("input").prop('disabled', function (_, val) { return ! val; });
+	// 	if (this.checked) {
+	// 		// alert("boo");
+	// 		 $(this).siblings("input").prop("disabled", false);
+	// 		// var url = "/settings/"+$(this).parent().parent().attr("id")+"/"+$(this).parent().attr("id")+"/"+$(this).siblings("input").val()+"/enable";
+	// 		// alert(url);
+	// 		// $.post("/settings/enable",
+	//   //           {
+	//   //               "league": $(this).parent().parent().attr("id"),
+	//   //               "game": $(this).parent().attr("id"),
+	//   //               "min": $(this).siblings("input").val()
+	//   //           },
+	//   //           function( data ) {
+	//   //               //do something with data/response returned by server
+	//   //           },
+	//   //           'json'
+	//   //       );
+	// 	} else {
+	// 		$.post("/settings/disable",
+	//             {
+	//                 // "_token": $( this ).find( 'input[name=_token]' ).val(),
+	//                 "league": $(this).parent().parent().attr("id"),
+	//                 "game": $(this).parent().attr("id"),
+	//             },
+	//             function( data ) {
+	//                 //do something with data/response returned by server
+	//             },
+	//             'json'
+	//         );
+	//         $(this).siblings("input").prop("disabled", true);               
 
-		};
-	});
-	$(".min_start").focusout(function(){
-		$.post("/settings/enable",
-	            {
-	                "league": $(this).parent().parent().attr("id"),
-	                "game": $(this).parent().attr("id"),
-	                "min": $(this).val()
-	            },
-	            function( data ) {
-	                //do something with data/response returned by server
-	            },
-	            'json'
-	        );
-	})
+	// 	};
+	// });
+	// $(".min_start").focusout(function(){
+	// 	$.post("/settings/enable",
+	//             {
+	//                 "league": $(this).parent().parent().attr("id"),
+	//                 "game": $(this).parent().attr("id"),
+	//                 "min": $(this).val()
+	//             },
+	//             function( data ) {
+	//                 //do something with data/response returned by server
+	//             },
+	//             'json'
+	//         );
+	// })
   $('#myTab a').click(function (e) {
   e.preventDefault()
   $(this).tab('show')

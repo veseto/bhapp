@@ -3,8 +3,8 @@
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
 
-class Settings extends Eloquent {
-    protected $table = 'settings';
+class Standings extends Eloquent {
+    protected $table = 'standings';
 
     public $timestamps = false;
 

@@ -14,23 +14,22 @@ class Match extends Eloquent {
     	return $this->belongsTo('Groups');
     }
 
+	public function odds() {
+    	return $this->hasMany('Odds1x2');
+    }    
+
     public static function matchesForSeason($leagueId, $season) {
 
     	return Match::where('league_details_id', '=', $leagueId)->where('season', '=', $season)->orderBy('matchDate', 'ASC')->orderBy('matchTime', 'ASC');
 
     }
     
-    public static function updateMatchDetails($match) {
-    	return Match::parseMatchDetails($match);
-    	
-    }
-
     private static function get_http_response_code($url) {
 	    $headers = get_headers($url);
 	    return substr($headers[0], 9, 3);
 	}
 
-	private static function parseMatchDetails($match) {
+	public static function updateMatchDetails($match) {
 		$baseUrl = "http://www.betexplorer.com/soccer/poland/ekstraklasa/";
 		$url = $baseUrl."matchdetails.php?matchid=".$match->id;
 		// echo "***  $matchId $url ***<br>";
@@ -182,7 +181,7 @@ class Match extends Eloquent {
 	}
 
 
-	private static function getMatchOdds($matchId) {
+	public static function getMatchOdds($matchId) {
 		$bookies = Bookmaker::all();
 		$bookmakers = array();
 		foreach ($bookies as $b) {

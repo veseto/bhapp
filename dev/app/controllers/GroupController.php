@@ -2,85 +2,21 @@
 
 class GroupController extends \BaseController {
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return Response
-	 */
-	public function index()
-	{
-		//
-	}
-
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return Response
-	 */
-	public function create()
-	{
-		//
-	}
-
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store()
-	{
-		//
-	}
-
-
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function show($id)
-	{
-		//
-	}
-
-
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function edit($id)
-	{
-		//
-	}
-
-
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function update($id)
-	{
-		//
-	}
-
-
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function destroy($id)
-	{
-		//
-	}
-
-
+	public function getGamesForGroup($league_details_id) {
+		$games = User::find(Auth::user()->id)->games()->lists('match_id');
+		// return $games;
+		$pool = User::find(Auth::user()->id)->pools()->where('league_details_id', '=', $league_details_id)->first();
+		$data = Groups::where('league_details_id', '=', $league_details_id)
+				->where('state', '=', '2')
+				->first()
+				->matches()
+				->join('games', 'games.match_id', '=', 'match.id')
+				->join('standings', 'games.standings_id', '=', 'standings.id')
+				->where('user_id', '=', Auth::user()->id)
+				->orderBy('bet', 'asc')
+				->orderBy('matchDate')
+				->orderBy('matchTime')
+				->get();
+		return View::make('matches')->with(['data' => $data, 'pool' => $pool, 'league_details_id' => $league_details_id]);
+	} 
 }

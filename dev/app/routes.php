@@ -12,11 +12,57 @@
 */
 
 //stats
+// Route::get('/boo', function(){
+// 	$date = date('Y-m-d');
+// 	$gr = Groups::find(3);
+// 	Parser::parseMatchesForGroup($gr);
+// 	Parser::parseLeagueSeries($gr);
+	
+// 	$from = 2;
+// 	$to = 6;
+// 	$teams = array();
+// 	for($i = 0; $i < 100; $i ++) {
+// 		$count = Standings::where('league_details_id', '=', $gr->league_details_id)
+// 				->where('streak', '>=', $i);
+// 		if ($count->count() <= $to){
+// 			if ($count->count() < $from) {
+// 				$teams = Standings::where('league_details_id', '=', $gr->league_details_id)
+// 				->where('streak', '>=', $i - 1)->lists('team');
+
+// 				break 1;
+// 			} else { 
+// 				$teams = Standings::where('league_details_id', '=', $gr->league_details_id)
+// 				->where('streak', '>=', $i)->lists('team');
+
+// 			}
+// 			break 1;
+// 		} 
+// 	}
+
+// 	// return $teams;
+// 	return $gr->matches()->where(function ($query) use ($teams) {
+//              $query->whereIn('home', $teams)
+//                    ->orWhereIn('away', $teams);
+//        })->get();
+// });
+
+// addGamesForUser parseLeagueSeries
+// Route::get('/boo', 'GamesController@addGamesForUser');
+// Route::get('/boo', '');
 Route::get('/boo', function(){
-	$date = date('Y-m-d');
-	// return Parser::parseMatchesForGroup(Groups::find(2));
-	return Groups::with('matches')->get();
+	// $league_details_id = 104;
+	// $matches = Match::where('league_details_id', '=', $league_details_id)->get();
+	// foreach ($matches as $m) {
+	// 	Updater::updateDetails($m);
+	// }
+	return Updater::update();
 });
+// Route::get('/boo', function(){
+// 	Parser::parseLeagueSeries(Groups::find(6));
+// });
+Route::post('/pools/get', 'PoolsController@getFromMain');
+Route::get('/group/{id}', 'GroupController@getGamesForGroup');
+
 
 Route::get('/nextmatches/{country}/{league}', 'MatchController@getNextMatchesForPlay');
 
@@ -51,8 +97,8 @@ Route::post('/settings/enable', "SettingsController@createEdit");
 Route::post('/settings/disable', "SettingsController@deleteIgnore");
 
 
-Route::get('/home/{from?}/{to?}', array('as' => 'matches', 'uses' => 'MatchController@getMatches'));
-Route::get('/', array('as' => 'matches', 'uses' => 'MatchController@getMatches'));
+Route::get('/home/{from?}/{to?}', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
+Route::get('/', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
 
 Route::get('/matches/{from?}/{to?}', 'MatchController@getMatches');
 

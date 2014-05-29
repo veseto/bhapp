@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGroupMatch extends Migration {
+class CreateStandingsTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,11 +12,13 @@ class CreateGroupMatch extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('group_match', function(Blueprint $table)
+		Schema::create('standings', function(Blueprint $table)
 		{
 			$table->increments('id');
-			$table->integer('group_id');
-			$table->string('mach_id');
+			$table->integer('league_details_id');
+			$table->integer('place');
+			$table->integer('streak');
+			$table->string('team');
 			$table->timestamps();
 		});
 	}
@@ -28,7 +30,7 @@ class CreateGroupMatch extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('group_match');
+		Schema::drop('standings');
 	}
 
 }
