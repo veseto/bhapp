@@ -150,6 +150,7 @@ class Games extends Eloquent {
 					 	// echo $b[0]." ".$h1->nodeValue;
 				    	if (strpos($h1->nodeValue, $bookmaker->bookmakerName)) {
 				    		$game->odds = $oddsX;
+				    		$game->income = $oddsX * $game->bet;
 				    		$game->save();
 				    	}
 					}	

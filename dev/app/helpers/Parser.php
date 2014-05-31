@@ -36,11 +36,11 @@ class Parser {
 
     }
 
-    public static function parseMatchesForGroup($group) {
+    public static function parseMatchesForGroup($current, $next) {
 		$baseUrl = "http://www.betexplorer.com/soccer/";
 		$tail = "fixtures/";
 
-		$league = LeagueDetails::findOrFail($group->league_details_id);
+		$league = LeagueDetails::findOrFail($current->league_details_id);
 		$url = $baseUrl.$league->country."/".$league->fullName."/".$tail;
 
 		if(Parser::get_http_response_code($url) != "200"){
@@ -62,12 +62,16 @@ class Parser {
         $home = "";
         $away = "";
         $id = "";
+        $group = $current;
         foreach ($rows as $row) {
 
             $headings = $row->getElementsByTagName('th');
             if ($headings->length > 0) {
-                if ($headings->item(0)->nodeValue == ($group->round + 1).'. Round') {
-                	break 1;
+                if ($headings->item(0)->nodeValue == ($current->round + 1).'. Round') {
+                	$group = $next;
+                }
+                if ($headings->item(0)->nodeValue == ($next->round + 1).'. Round') {
+                    break 1;
                 }
             }
             $cols = $row->getElementsByTagName('td');

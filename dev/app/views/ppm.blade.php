@@ -15,4 +15,5 @@
 @stop
 
 @section('content')
+
 @stop

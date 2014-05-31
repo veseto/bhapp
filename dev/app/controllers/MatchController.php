@@ -3,6 +3,10 @@
 
 class MatchController extends BaseController {
 
+	public function details($team, $date) {
+		return View::make('details');
+	}
+
 	public function showWelcome($country, $leagueName, $season)	{
 		
 		return View::make('stats');

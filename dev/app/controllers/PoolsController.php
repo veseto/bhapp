@@ -25,4 +25,24 @@ class PoolsController extends \BaseController {
 	public function managePools(){
 		return View::make('poolmanagement');
 	}
+
+	public function pushToMain($league_details_id, $user_id, $amount) {
+		$pool = Pool::where('user_id', '=', $user_id)->where('league_details_id', '=', $league_details_id)->get();
+		$pool->amount = $pool->amount - $amount;
+		$pool->save;
+		$common->amount = $common->amount + $amount;
+		$common->save;
+		$groups_id = Groups::where('league_details_id', '=', $league_details_id)->where('state', '=', 2)->first(['id']);
+		Updater::recalculateGroup($groups_id->id, $user_id);
+	}
+
+	public function pullFromMain($league_details_id, $user_id, $amount) {
+		$pool = Pool::where('user_id', '=', $user_id)->where('league_details_id', '=', $league_details_id)->get();
+		$pool->amount = $pool->amount + $amount;
+		$pool->save;
+		$common->amount = $common->amount - $amount;
+		$common->save;
+		$groups_id = Groups::where('league_details_id', '=', $league_details_id)->where('state', '=', 2)->first(['id']);
+		Updater::recalculateGroup($groups_id->id, $user_id);
+	}
 }

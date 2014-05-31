@@ -5,22 +5,25 @@ class Updater {
 	public static function update() {
 		$time = time();
 		$allMatches = Updater::getAllMatchesForUpdate();
+		// return $allMatches;
 		foreach ($allMatches as $match) {
 			$match = Updater::updateDetails($match);
+			echo $match->resultShort.'<br>';
 			try {
 				$match->id;
 			} catch (ErrorException $e) {
 				continue;
 			}
 			if ($match->groups_id != 0) {
-				$games = Updater::getAllSpecialGamesForMatch($match->id);
+				$games = Updater::getAllGamesForMatch($match->id);
 				foreach ($games as $game) {
-					return Updater::updatePool($game, $match->resultShort);
-					Updater::recalculateGroup($match->groups_id, $game->user_id);
+					Updater::updatePool($game, $match->resultShort);
+					if ($game->special == 1) {
+						Updater::recalculateGroup($match->groups_id, $game->user_id);
+					}
 				}
 				if (Updater::isLastGameInGroup($match)) {
-
-					return Updater::updateGroup($match->groups_id);
+					Updater::updateGroup($match->groups_id);
 				}
 			}
 		}
@@ -36,7 +39,6 @@ class Updater {
 			}
 		}
 		$gr = Groups::find($groups_id);
-		print_r($gr);
 		$current = Groups::firstOrCreate(['league_details_id' => $gr->league_details_id, 'state' => 3, 'round' => ($gr->round + 1)]);
 		$gr->state = 1;
 		$gr->save();
@@ -44,8 +46,8 @@ class Updater {
 		$current->save();
 		$next = Groups::firstOrCreate(['league_details_id' => $gr->league_details_id, 'state' => 3, 'round' => ($current->round + 1)]);
 		// return $next;
-		Parser::parseMatchesForGroup($next);
-		Parser::parseMatchesForGroup($current);
+		// Parser::parseMatchesForGroup($next);
+		Parser::parseMatchesForGroup($current, $next);
 		Parser::parseLeagueSeries($current);
 		$ids = Settings::where('league_details_id', '=', $current->league_details_id)->lists('user_id');
 		foreach ($ids as $id) {
@@ -54,11 +56,8 @@ class Updater {
 	}
 
 	public static function isLastGameInGroup($match) {
-		$id = Match::where('groups_id', '=', $match->groups_id)
-			->orderBy('matchDate', 'desc')
-			->orderBy('matchTime', 'desc')
-			->first()->id;
-		return ($id == $match->id)." ";
+		$count = Match::where('groups_id', '=', $match->groups_id)->where('resultShort', '=', '-')->count();
+		return ($count < 1);
 	}
 
 	public static function getAllMatchesForUpdate() {
@@ -73,10 +72,8 @@ class Updater {
 			                      ->where('matchTime', '<=', $start[1]);
 			            });
 				})
-				->where(function($query) {
-		                $query->where('resultShort', '=', '')
-		                      ->orWhere('resultShort', '=', '-');
-		            })
+				->where('resultShort', '=', '-')
+				->where('groups_id', '<>', 0)
 				->where('state', '<>', 'canceled')
 				->where('state', '<>', 'Awarded')
 				->orderBy('matchDate')
@@ -89,9 +86,8 @@ class Updater {
 		return Match::updateMatchDetails($match);
 	}
 
-	public static function getAllSpecialGamesForMatch($match_id) {
+	public static function getAllGamesForMatch($match_id) {
 		return Games::where('match_id', '=', $match_id)
-			->where('special', '=', 1)
 			->get();
 	}
 
@@ -104,14 +100,20 @@ class Updater {
 			return;
 		}
 		$pool = Pools::where('user_id', '=', $user_id)->where('league_details_id', '=', $league_details_id)->first();
+		$main = CommonPools::where('user_id', '=', $user_id)->first();
 		if ($resultShort == 'D') {
-			$pool->amount = $pool->amount - $game->bsf;
+			if ($game->special == 1){
+				$pool->amount = $pool->amount - $game->bsf;
+			}
 			$pool->income = $pool->income + $game->income;
+			$main->income = $main->income + $game->income;
 		} else {
-			$pool->amount = $pool->amount + $game->bet;
+			if ($game->special == 1){
+				$pool->amount = $pool->amount + $game->bet;
+			}
 		}
+		$main->save();
 		$pool->save();
-		$pool;
 	}
 
 	public static function recalculateGroup($groups_id, $user_id) {
@@ -145,30 +147,28 @@ class Updater {
 		// $bsfpm = $pool;
 		$recalc = false;
 		foreach ($teams as $st_id => $team) {
-			$match = $gr->matches()->where(function ($query) use ($team) {
+			$matches = $gr->matches()->where(function ($query) use ($team) {
 	             $query->where('home', '=', $team)
 	                   ->orWhere('away', '=', $team);
-	        })->where(function ($query) {
-	             $query->where('resultShort', '=', '-')
-	                   ->orWhere('resultShort', '=', '');
 	        })
+	        ->where('resultShort', '=', '-')
 	        ->orderBy('matchDate')
 			->orderBy('matchTime')
 	        ->get();
-	        if (count($match) == 0) {
+	        if (count($matches) == 0) {
 	        	$recalc = true;
-	        } else if (count($match) == 1) {
-	        	$match = $match[0];
+	        } else if (count($matches) == 1) {
+	        	$match = $matches[0];
 				//TODO: add setting based bookmaker && special match check
-				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
+				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'groups_id' => $match->groups_id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
 				$game->bet = $bpm;
 				$game->bsf = $bsfpm;
 				// $game->odds = 3;
 				$game->income = $game->odds * $game->bet;
 				$game->save();
-			} else if (count($match) > 1) {
-				$match = $match[0];
-				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
+			} else if (count($matches) > 1) {
+				$match = $matches[0];
+				$game = Games::firstOrCreate(['user_id' => $user_id, 'match_id' => $match->id, 'groups_id' => $match->groups_id, 'game_type_id' => 1, 'bookmaker_id' => 1, 'standings_id' =>$st_id]);
 				$game->bet = $bpm;
 				$game->bsf = $bsfpm;
 				// $game->odds = 3;
@@ -178,7 +178,7 @@ class Updater {
 			}
 		}
 		if ($recalc) {
-			return Games::recalculate($gr->id, $setting->multiplier, $pool->amount, $user_id);
+			Games::recalculate($gr->id, $setting->multiplier, $pool->amount, $user_id);
 		}
 	}
 

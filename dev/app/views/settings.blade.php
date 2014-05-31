@@ -40,24 +40,24 @@
 				        </a>
 				      </h4>
 					    </div>
-					    <div id="{{ $country }}" class="panel-collapse collapse">
+					    <div id="{{ $country }}" class="panel-collapse">
 				      <div class="panel-body">
 						<table class="table">
 							<tr>
 							  <td>
-							  	
+							  	&nbsp;
 							  </td>
 							  <td>
-							  	<abbr title="Enables leagues series in the play per series mode at the specified legnth">Series</abbr> / <abbr title="Number of matches before a series becomes active. Example: If Liverpool has not made a draw for 3 matches in a row and length is set to 3 the next Liverpool match will be actie.">Length</abbr>
+							  	<abbr title="Enables leagues series in the play per series mode at the specified legnth">1x2</abbr> (<abbr title="Number of matches before a series becomes active. Example: If Liverpool has not made a draw for 3 matches in a row and length is set to 3 the next Liverpool match will become available to play.">?</abbr>) 
 							  </td>
 							  <td>
-							  	0:0 / Length
+							  	0:0
 							  </td>
 							  <td>
-							  	1:1 / Length
+							  	1:1
 							  </td>
 							  <td>
-							  	2:2 / Length
+							  	2:2
 							  </td>
 							</tr>
 							  @foreach($leagues as $name=>$s)
@@ -67,7 +67,7 @@
 							  </td>
 							  @for($j = 1; $j < 5; $j ++)
 								  <td id="{{$j}}">
-				  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
+				  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="width: 25px;" disabled>
 								  </td>
 							  @endfor
 							</tr>
@@ -106,16 +106,16 @@
 							  	
 							  </td>
 							  <td>
-							  	Series / Length
+							  	Series
 							  </td>
 							  <td>
-							  	0:0 / Length
+							  	0:0
 							  </td>
 							  <td>
-							  	1:1 / Length
+							  	1:1
 							  </td>
 							  <td>
-							  	2:2 / Length
+							  	2:2
 							  </td>
 							</tr>
 							
@@ -127,7 +127,7 @@
 							  </td>
 							  @for($j = 5; $j < 9; $j ++)
 								  <td id="{{$j}}">
-				  			  	      	<input class="activate_league_for_play" type="checkbox"> at <input class="min_start" type="text" style="height: 20px;width: 25px;" disabled>
+				  			  	      	<input class="activate_league_for_play" type="checkbox">
 								  </td>
 							  @endfor
 							</tr>

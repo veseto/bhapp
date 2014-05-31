@@ -2,8 +2,11 @@
 
 class BaseController extends Controller {
 	public function __construct() {
-		$global = CommonPools::where('user_id', '=', Auth::user()->id)->first();
-	    View::share('global', $global);	
+		if (!Auth::guest()) {
+			$global = CommonPools::where('user_id', '=', Auth::user()->id)->first();
+		    View::share('global', $global);	
+		    View::share('base', Request::segment('1'));
+		}
 	}
 
 	/**

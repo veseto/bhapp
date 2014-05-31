@@ -12,59 +12,39 @@
 */
 
 //stats
-// Route::get('/boo', function(){
-// 	$date = date('Y-m-d');
-// 	$gr = Groups::find(3);
-// 	Parser::parseMatchesForGroup($gr);
-// 	Parser::parseLeagueSeries($gr);
-	
-// 	$from = 2;
-// 	$to = 6;
-// 	$teams = array();
-// 	for($i = 0; $i < 100; $i ++) {
-// 		$count = Standings::where('league_details_id', '=', $gr->league_details_id)
-// 				->where('streak', '>=', $i);
-// 		if ($count->count() <= $to){
-// 			if ($count->count() < $from) {
-// 				$teams = Standings::where('league_details_id', '=', $gr->league_details_id)
-// 				->where('streak', '>=', $i - 1)->lists('team');
 
-// 				break 1;
-// 			} else { 
-// 				$teams = Standings::where('league_details_id', '=', $gr->league_details_id)
-// 				->where('streak', '>=', $i)->lists('team');
-
-// 			}
-// 			break 1;
-// 		} 
-// 	}
-
-// 	// return $teams;
-// 	return $gr->matches()->where(function ($query) use ($teams) {
-//              $query->whereIn('home', $teams)
-//                    ->orWhereIn('away', $teams);
-//        })->get();
-// });
-
-// addGamesForUser parseLeagueSeries
-// Route::get('/boo', 'GamesController@addGamesForUser');
-// Route::get('/boo', '');
 Route::get('/boo', function(){
 	// $league_details_id = 104;
 	// $matches = Match::where('league_details_id', '=', $league_details_id)->get();
 	// foreach ($matches as $m) {
 	// 	Updater::updateDetails($m);
 	// }
-	// return Parser::parseLeagueSeries(Groups::find(6));
-	// return Updater::recalculateGroup(6,1);
+	// Parser::parseLeagueSeries(Groups::find(43));
+	// Parser::parseMatchesForGroup(Groups::find(43), Groups::find(44));
+	// Updater::recalculateGroup(43,2);
+	// Updater::recalculateGroup(43,1);
 	return Updater::update();
+	// $matches = Match::where('groups_id', '=', 43)->get();
+	// foreach ($matches as $match) {
+	// 	Match::updateMatchDetails($match);
+	// 	$bet365 = Odds1x2::where('match_id', '=', $match->id)->where('bookmaker_id', '=', 1)->first();
+	// 	$betfair = Odds1x2::where('match_id', '=', $match->id)->where('bookmaker_id', '=', 2)->first();
+	// 	echo $match->home."-".$match->away.":".$bet365->oddsX."/".$betfair->oddsX.'<br>';
+	// }
 });
+Route::get('/details/{team}/{date}', "MatchController@details");
+
 Route::get('/poolmanagement', "PoolsController@managePools");
-Route::get('/ppm', "PPMController@display");
-Route::get('/livescore', "LivescoreController@livescore");
-Route::post('/pools/get', 'PoolsController@getFromMain');
+
+Route::get('/ppm/{from?}/{to?}', "PPMController@display");
+
+Route::get('/livescore/{from?}/{to?}', "LivescoreController@livescore");
+
+// Route::post('/pools/get', 'PoolsController@getFromMain');
+
 Route::get('/group/{id}', 'GroupController@getGamesForGroup');
 Route::get('/group/{groups_id}/odds', 'GamesController@getMatchOddsForGames');
+
 Route::post('/save', 'GamesController@saveTable');
 Route::get('/clone/{game_id}', 'GamesController@cloneMatch');
 Route::get('/delete/{game_id}', 'GamesController@removeMatch');
@@ -79,14 +59,14 @@ Route::get('/roundpercent/{country}/{league}', 'SeriesController@percentDrawsPer
 Route::get('/simulator/{country?}/{league?}/{seasoncount?}', 'SimulatorController@getSimMatches');
 Route::post('/simulator/{country?}/{league?}/{seasoncount?}', 'SimulatorController@newSim');
 
-Route::get('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@getSimMatchesFix');
-Route::post('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@newSimFix');
+// Route::get('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@getSimMatchesFix');
+// Route::post('/simulatorfix/{country?}/{league?}/{seasoncount?}', 'SimulatorController@newSimFix');
 
-Route::get('/calculateseries/{country}', "SeriesController@calculatePPSSeries");
-Route::get('/calculateseries/{country}/{team}', "SeriesController@calculatePPSSeriesForTeam");
-Route::get('/updateseries', "SeriesController@updateAllPPSSeries");
+// Route::get('/calculateseries/{country}', "SeriesController@calculatePPSSeries");
+// Route::get('/calculateseries/{country}/{team}', "SeriesController@calculatePPSSeriesForTeam");
+// Route::get('/updateseries', "SeriesController@updateAllPPSSeries");
 
-Route::get('/calculateseriesppm', "SeriesController@calculatePPMSeries");
+//Route::get('/calculateseriesppm', "SeriesController@calculatePPMSeries");
 
 Route::get('/show', "SeriesController@getSeries");
 
@@ -101,7 +81,7 @@ Route::get('/settings', 'SettingsController@display');
 Route::get('/home/{from?}/{to?}', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
 Route::get('/', array('as' => 'matches', 'uses' => 'GamesController@getGroups'));
 
-Route::get('/matches/{from?}/{to?}', 'MatchController@getMatches');
+// Route::get('/matches/{from?}/{to?}', 'MatchController@getMatches');
 
 Route::get('countries', array('as' => 'countries', 'uses' => 'LeagueDetailsController@getCountriesPlusLeagues'));
 

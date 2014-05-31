@@ -38,4 +38,18 @@ class SettingsController extends BaseController {
 		return View::make('settings')->with(array('ppm' => $ppm, 'pps' => $pps));
 	}
 
+	// public function saveSettings($user_id, $league_details_id, $from, $to, $multiplier) {
+	// 	$settings = Settings::firstOrNew('user_id' => $user_id, 'league_details_id' => $league_details_id, 'from' => $from, 'to' => $to, 'multiplier' => $multiplier);
+	// 	$settings->save;
+	// 	$pool = Pool::firstOrNew('user_id' => $user_id, 'league_details_id' => $league_details_id);
+	// 	$pool->save;
+	// 	$groups_id = Groups::where('league_details_id', '=', $league_details_id)->where('state', '=', 2)->first()->id;
+	// 	Updater::recalculateGroup($groups_id, $user_id);
+	// }
+
+	// public function deleteSettings($user_id, $league_details_id) {
+	// 	$settings = Settings::firstOrFail('user_id' => $user_id, 'league_details_id' => $league_details_id);
+	// 	$settings->delete;
+	// }	
+
 }

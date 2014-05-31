@@ -29,6 +29,7 @@
 	<table id="matches">
 		<thead>
 			<tr>
+				<th><input type="hidden"></th>
 				<th><input type="text" name="search_engine" class="search_init" placeholder="date"></th>
 				<th><input type="text" name="search_engine" class="search_init" placeholder="time"></th>
 				<th><input type="text" name="search_engine" class="search_init" placeholder="home"></th>
@@ -45,6 +46,7 @@
 				<th><input type="hidden"></th>
 			</tr>
 			<tr>
+				<th></th>
 				<th>date</th>
 				<th>time</th>
 				<th>home</th>
@@ -64,7 +66,8 @@
 		<tbody>
 			@foreach($data as $d)
 				<tr class="{{$d->match_id}}" id="{{$d->games_id}}">
-					<td>{{$d->matchDate}}</td>
+					<td class="center"><img class="clickable" src="dt/examples/examples_support/details_open.png"></td>	          
+		  			<td>{{$d->matchDate}}</td>
 					<td>{{$d->matchTime}}</td>
 					<td>
 						@if ($d->team == $d->home)
@@ -92,6 +95,39 @@
 					<td><a href="/delete/{{$d->games_id}}"> delete </a></td>
 				</tr>
 			@endforeach
+			@foreach($grey as $tmp)
+				@foreach($tmp as $d)
+				<tr>
+					<td class="center"><img class="clickable" src="dt/examples/examples_support/details_open.png"></td>	          
+			  		<td>{{$d->matchDate}}</td>
+					<td>{{$d->matchTime}}</td>
+					<td>
+						@if ($d->team == $d->home)
+							<strong>{{$d->home}}</strong>
+						@else
+							{{$d->home}}
+						@endif
+					</td>
+					<td>
+						@if ($d->team == $d->away)
+							<strong>{{$d->away}}</strong>
+						@else
+							{{$d->away}}
+						@endif
+					</td>
+					<td>{{$d->resultShort}}</td>
+					<td>{{$d->streak}}</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+					<td>-</td>
+				</tr>
+				@endforeach
+			@endforeach
 		</tbody>
 	</table>
 	<script type="text/javascript">
@@ -110,6 +146,33 @@
  //            'json'
  //        );
 	// });
+	function fnFormatDetails ( oTable, nTr ) {
+		var text = '';
+		var aData = oTable.fnGetData( nTr );
+		var team = '';
+		if (aData[3].indexOf("<strong>") > -1) {
+			  var re = new RegExp("<strong>(.*?)</strong>");
+			  var m = re.exec(aData[3]);
+			  team = m[1];
+		} else if (aData[4].indexOf("<strong>") > -1) {
+			  var re = new RegExp("<strong>(.*?)</strong>");
+			  var m = re.exec(aData[4]);
+			  team = m[1];
+		}
+		var promise = testAjax(team, aData[2]);
+		promise.success(function (data) {
+		  text = data;
+		});
+		return text;
+	}
+
+	function testAjax(team, mDate) {
+		var url = "/details/" + team + "/" + mDate;
+		return $.ajax({
+			async: false,
+		url:url
+			});
+	}
 
 	$( "tbody>tr" ).hover(
 		function() {
@@ -179,10 +242,10 @@
 	        "callback": function( sValue, y ) {
 	            var aPos = oTable.fnGetPosition( this );
 	            var arr = sValue.split("#");
-	            oTable.fnUpdate( arr[0], aPos[0], 8 );
-	           	oTable.fnUpdate( arr[1], aPos[0], 9 );
-	            oTable.fnUpdate( arr[2], aPos[0], 10 );
-	            oTable.fnUpdate( arr[3], aPos[0], 11 );
+	            oTable.fnUpdate( arr[0], aPos[0], 9 );
+	           	oTable.fnUpdate( arr[1], aPos[0], 10 );
+	            oTable.fnUpdate( arr[2], aPos[0], 11 );
+	            oTable.fnUpdate( arr[3], aPos[0], 12 );
 	            if (arr[4] != "") {
 	            	if (arr[4] != $("#pool").text()) {
 	            		$("#crr").html("<strong>"+arr[4]+"</strong>");
@@ -219,11 +282,27 @@
 	        "width": "40px"
 	    } );
 
-		if ($("#crr").text() != $("#pool").text()) {
-    		$("#crr").html("<strong>"+$("#crr").text()+"</strong>");
-    	} else {
-    		$("#crr").html(arr[4]);
-    	}
+	    $('#matches tbody').on('click', '.clickable', function () {
+				var nTr = this.parentNode.parentNode;
+				if ( this.src.match('details_close') )
+				{
+					/* This row is already open - close it */
+					this.src = "dt/examples/examples_support/details_open.png";
+					oTable.fnClose( nTr );
+				}
+				else
+				{
+					/* Open this row */
+					this.src = "dt/examples/examples_support/details_close.png";
+					oTable.fnOpen( nTr, fnFormatDetails(oTable, nTr), 'details' );
+				}
+			} );
+
+		// if ($("#crr").text() != $("#pool").text()) {
+  //   		$("#crr").html("<strong>"+$("#crr").text()+"</strong>");
+  //   	} else {
+  //   		$("#crr").html(arr[4]);
+  //   	}
 
 	});
 	</script>

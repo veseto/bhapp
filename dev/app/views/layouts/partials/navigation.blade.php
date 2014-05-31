@@ -37,8 +37,10 @@
 		    <li><p class="navbar-text"><span class="text-default">P: {{$pool->amount}} (<strong>{{$pool->current}}</strong>)</span></p></li>
 		    <li><p class="navbar-text"><span class="text-default">I: {{$pool->income}}</span></p></li>
 		    @endif
+		    @if(isset($global))
 		    <li><p class="navbar-text"><span class="text-success">{{$global->amount}}</span></p></li>
 		    <li><p class="navbar-text"><span class="text-success">{{$global->income}}</span></p></li>
+		    @endif
 		  </ul>
 		</div><!--/.nav-collapse -->
 	</div>
